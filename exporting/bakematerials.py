@@ -177,7 +177,7 @@ def bake_pass(resolutionMultiplier, folderpath, bake_type):
     fileList = Path(folderpath).glob('*.*')
     files = [file for file in fileList if file.is_file()]
     #print(files)
-    exportType = 'TARGA_RAW'
+    exportType = 'PNG'
     exportColormode = 'RGBA'
     #get the currently selected object as the active object
     object_to_bake = bpy.context.active_object
