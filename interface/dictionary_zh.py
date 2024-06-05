@@ -59,6 +59,11 @@ translation_dictionary = {
 移除重复的眼白材质槽（如果存在）
 移除“Upper Chest”骨骼，
 编辑骨骼层次以允许Unity自动检测正确骨骼""",
+    'prep_drop_E'       : "虚幻引擎",
+    'prep_drop_E_tt'    : """删除轮廓...
+    移除重复的眼白材质槽（如果存在）
+    编辑骨骼层次以适配Unreal Mannequin骨骼，
+    添加与Mannequin相同的IK骨骼""",
 
     'simp_drop'     : '骨架简化型',
     'simp_drop_A'   : '非常简单（慢）',

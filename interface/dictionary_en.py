@@ -63,6 +63,11 @@ translation_dictionary = {
     removes duplicate Eyewhite material slot if present,
     removes the "Upper Chest" bone,
     edits bone hierarchy to allow Unity to automatically detect the right bones""",
+    'prep_drop_E'       : "Unreal Engine",
+    'prep_drop_E_tt'    : """Removes the outline and...
+    removes duplicate Eyewhite material slot if present,
+    edits bone hierarchy to match Epic Mannequin skeleton,
+    add the same IK bones with Mannequin""",
 
     'simp_drop'     : 'Armature simplification type',
     'simp_drop_A'   : 'Very simple (SLOW)',

@@ -1,8 +1,11 @@
-#simplfies bone count using the merge weights function in CATS
+# simplfies bone count using the merge weights function in CATS
 
-import bpy, traceback, time
+import bpy
+import traceback
+import time
 from .. import common as c
 from ..interface.dictionary_en import t
+
 
 def main(prep_type, simp_type, separate_hair):
 
@@ -12,44 +15,46 @@ def main(prep_type, simp_type, separate_hair):
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.select_all(action='DESELECT')
 
-    #Assume hidden items are unused and move them to their own collection
+    # Assume hidden items are unused and move them to their own collection
     c.kklog('Moving unused objects to their own collection...')
-    no_move_objects = ['Bonelyfans', 'Shadowcast', 'Hitboxes', 'Body', 'Armature']
+    no_move_objects = ['Bonelyfans', 'Shadowcast',
+                       'Hitboxes', 'Body', 'Armature']
     for object in bpy.context.scene.objects:
-        #print(object.name)
+        # print(object.name)
         move_this_one = object.name not in no_move_objects and 'Widget' not in object.name and object.hide
         if move_this_one:
             object.hide = False
             object.select_set(True)
-            bpy.context.view_layer.objects.active=object
+            bpy.context.view_layer.objects.active = object
     if bpy.context.selected_objects:
-        bpy.ops.object.move_to_collection(collection_index=0, is_new=True, new_collection_name='Unused clothing items')
-    #hide the new collection
+        bpy.ops.object.move_to_collection(
+            collection_index=0, is_new=True, new_collection_name='Unused clothing items')
+    # hide the new collection
     try:
         bpy.context.scene.view_layers[0].active_layer_collection = bpy.context.view_layer.layer_collection.children['Unused clothing items']
         bpy.context.scene.view_layers[0].active_layer_collection.exclude = True
     except:
         try:
-            #maybe the collection is in the default Collection collection
+            # maybe the collection is in the default Collection collection
             bpy.context.scene.view_layers[0].active_layer_collection = bpy.context.view_layer.layer_collection.children['Collection'].children['Unused clothing items']
             bpy.context.scene.view_layers[0].active_layer_collection.exclude = True
         except:
-            #maybe the collection is already hidden, or doesn't exist
+            # maybe the collection is already hidden, or doesn't exist
             pass
-    
+
     c.kklog('Removing object outline modifier...')
     for ob in bpy.data.objects:
         if ob.modifiers.get('Outline Modifier'):
             ob.modifiers['Outline Modifier'].show_render = False
             ob.modifiers['Outline Modifier'].show_viewport = False
-        #remove the outline materials because they won't be baked
+        # remove the outline materials because they won't be baked
         if ob in [obj for obj in bpy.context.view_layer.objects if obj.type == 'MESH']:
             ob.select_set(True)
-            bpy.context.view_layer.objects.active=ob
+            bpy.context.view_layer.objects.active = ob
             bpy.ops.object.material_slot_remove_unused()
     bpy.ops.object.select_all(action='DESELECT')
     body = bpy.data.objects['Body']
-    bpy.context.view_layer.objects.active=body
+    bpy.context.view_layer.objects.active = body
     body.select_set(True)
 
     c.kklog('disabling uv warp modifiers on the eyes...')
@@ -60,7 +65,7 @@ def main(prep_type, simp_type, separate_hair):
             ob.modifiers['Right Eye UV warp'].show_render = False
             ob.modifiers['Right Eye UV warp'].show_viewport = False
 
-    #remove the second Template Eyewhite slot if there are two of the same name in a row
+    # remove the second Template Eyewhite slot if there are two of the same name in a row
     index = 0
     for mat_slot_index in range(len(body.material_slots)):
         if body.material_slots[mat_slot_index].name == 'KK Eyewhites (sirome)':
@@ -69,19 +74,19 @@ def main(prep_type, simp_type, separate_hair):
         body.active_material_index = index
         bpy.ops.object.material_slot_remove()
 
-    #Select the armature and make it active
+    # Select the armature and make it active
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.select_all(action='DESELECT')
     bpy.data.objects['Armature'].hide_set(False)
     bpy.data.objects['Armature'].select_set(True)
-    bpy.context.view_layer.objects.active=bpy.data.objects['Armature']
+    bpy.context.view_layer.objects.active = bpy.data.objects['Armature']
     bpy.ops.object.mode_set(mode='POSE')
 
-    #If simplifying the bones...
+    # If simplifying the bones...
     if simp_type in ['A', 'B']:
         show_bones()
 
-        #Move pupil bones to layer 1
+        # Move pupil bones to layer 1
         armature = bpy.data.objects['Armature']
         if armature.data.bones.get('Left Eye'):
             armature.data.bones['Left Eye'].layers[0] = True
@@ -89,51 +94,52 @@ def main(prep_type, simp_type, separate_hair):
             armature.data.bones['Right Eye'].layers[0] = True
             armature.data.bones['Right Eye'].layers[10] = False
 
-        #Select bones on layer 11
+        # Select bones on layer 11
         for bone in armature.data.bones:
-            if bone.layers[10]==True:
+            if bone.layers[10] == True:
                 bone.select = True
-        
-        #if very simple selected, also get 3-5,12,17-19
+
+        # if very simple selected, also get 3-5,12,17-19
         if simp_type in ['A']:
             for bone in armature.data.bones:
-                select_bool = bone.layers[2] or bone.layers[3] or bone.layers[4] or bone.layers[11] or bone.layers[12] or bone.layers[16] or bone.layers[17] or bone.layers[18]
+                select_bool = bone.layers[2] or bone.layers[3] or bone.layers[4] or bone.layers[
+                    11] or bone.layers[12] or bone.layers[16] or bone.layers[17] or bone.layers[18]
                 if select_bool:
                     bone.select = True
-        
+
         c.kklog('Using the merge weights function in CATS to simplify bones...')
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.kkbp.cats_merge_weights()
 
-    #if separate the hair...
+    # if separate the hair...
     if separate_hair:
         show_bones()
-        
-        #Select bones on layer 10
+
+        # Select bones on layer 10
         for bone in armature.data.bones:
-            if bone.layers[9]==True:
+            if bone.layers[9] == True:
                 bone.select = True
 
-        #Separate the hair bones to a new armature
+        # Separate the hair bones to a new armature
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.armature.separate()
         new_armature = bpy.data.objects['Armature.001']
-        new_armature.name="Hair"
+        new_armature.name = "Hair"
 
-        #Move hair meshes to the new armature
+        # Move hair meshes to the new armature
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action="DESELECT")
         bpy.data.objects['Hair Outfit 00'].select_set(True)
-        bpy.context.view_layer.objects.active=new_armature
+        bpy.context.view_layer.objects.active = new_armature
         bpy.ops.object.parent_set(type='ARMATURE')
 
-    #If exporting for VRM or VRC...
+    # If exporting for VRM or VRC...
     if prep_type in ['A', 'D']:
         c.kklog('Editing armature for VRM...')
-        bpy.context.view_layer.objects.active=armature
+        bpy.context.view_layer.objects.active = armature
         bpy.ops.object.mode_set(mode='EDIT')
 
-        #Rearrange bones to match CATS output 
+        # Rearrange bones to match CATS output
         armature.data.edit_bones['Pelvis'].parent = None
         armature.data.edit_bones['Spine'].parent = armature.data.edit_bones['Pelvis']
         armature.data.edit_bones['Hips'].name = 'dont need lol'
@@ -144,15 +150,17 @@ def main(prep_type, simp_type, separate_hair):
         armature.data.edit_bones['Right ankle'].parent = armature.data.edit_bones['Right knee']
         armature.data.edit_bones['Left shoulder'].parent = armature.data.edit_bones['Upper Chest']
         armature.data.edit_bones['Right shoulder'].parent = armature.data.edit_bones['Upper Chest']
-        armature.data.edit_bones.remove(armature.data.edit_bones['dont need lol'])
+        armature.data.edit_bones.remove(
+            armature.data.edit_bones['dont need lol'])
 
         bpy.ops.object.mode_set(mode='POSE')
         bpy.ops.pose.select_all(action='DESELECT')
 
-        #Merge specific bones for unity rig autodetect
+        # Merge specific bones for unity rig autodetect
         armature = bpy.data.objects['Armature']
-        merge_these = ['cf_j_waist02', 'cf_s_waist01', 'cf_s_hand_L', 'cf_s_hand_R']
-        #Delete the upper chest for VR chat models, since it apparently causes errors with eye tracking
+        merge_these = ['cf_j_waist02', 'cf_s_waist01',
+                       'cf_s_hand_L', 'cf_s_hand_R']
+        # Delete the upper chest for VR chat models, since it apparently causes errors with eye tracking
         if prep_type == 'D':
             merge_these.append('Upper Chest')
         for bone in armature.data.bones:
@@ -162,119 +170,204 @@ def main(prep_type, simp_type, separate_hair):
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.kkbp.cats_merge_weights()
 
-    #If exporting for MMD...
+    # If exporting for Unreal...
+    if prep_type == 'E':
+        bpy.context.view_layer.objects.active = armature
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        ue_rename_dict = {
+            'BodyTop': 'root',
+            'cf_j_hips': 'pelvis',
+            'cf_j_waist02': 'spine_01',
+            'cf_j_waist01': 'spine_02',
+            'cf_j_spine01': 'spine_03',
+            'cf_j_spine02': 'spine_04',
+            'cf_j_spine03': 'spine_05',
+            'cf_j_neck': 'neck',
+            'cf_j_head': 'head',
+            'cf_j_shoulder_L': 'clavicle_l',
+            'cf_j_shoulder_R': 'clavicle_r',
+            'cf_j_arm00_L': 'upperarm_l',
+            'cf_j_arm00_R': 'upperarm_r',
+            'cf_j_forearm01_L': 'lowerarm_l',
+            'cf_j_forearm01_R': 'lowerarm_r',
+            'cf_j_hand_L': 'hand_l',
+            'cf_j_hand_R': 'hand_r',
+            'cf_J_hitomi_tx_L': 'eye_l',
+            'cf_J_hitomi_tx_R': 'eye_r',
+
+            'cf_j_thigh00_L': 'thigh_l',
+            'cf_j_thigh00_R': 'thigh_r',
+            'cf_j_leg01_L': 'calf_l',
+            'cf_j_leg01_R': 'calf_r',
+            'cf_j_leg03_L': 'foot_l',
+            'cf_j_leg03_R': 'foot_r',
+            'cf_j_toes_L': 'ball_l',
+            'cf_j_toes_R': 'ball_r'
+        }
+        for bone in ue_rename_dict:
+            if armature.data.bones.get(bone):
+                armature.data.bones[bone].name = ue_rename_dict[bone]
+
+        armature.data.edit_bones['pelvis'].parent = armature.data.edit_bones['root']
+        armature.data.edit_bones['spine_01'].parent = armature.data.edit_bones['pelvis']
+        armature.data.edit_bones['spine_02'].parent = armature.data.edit_bones['spine_01']
+        armature.data.edit_bones['spine_03'].parent = armature.data.edit_bones['spine_02']
+        armature.data.edit_bones['thigh_l'].parent = armature.data.edit_bones['pelvis']
+        armature.data.edit_bones['thigh_r'].parent = armature.data.edit_bones['pelvis']
+
+        '''private_parts = armature.data.edit_bones.new("private")
+        private_parts.head = (0,0,0.8)
+        private_parts.tail = (0,0,0.81)
+        private_parts.parent = armature.data.edit_bones['pelvis']
+        for private_part in ['cf_d_siri_L','cf_d_ana','cf_d_kokan','cf_d_siri_R','cf_d_sirihit_L','cf_d_sirihit_R']:
+            armature.data.edit_bones[private_part].parent = private_parts'''
+
+        for bone_remove in armature.data.edit_bones['cf_n_height'].children_recursive:
+            armature.data.edit_bones.remove(bone_remove)
+        armature.data.edit_bones.remove(
+            armature.data.edit_bones['cf_n_height'])
+
+        ue_ik_bones = {
+            'ik_foot_root': 'root',
+            'ik_foot_l': 'foot_l',
+            'ik_foot_r': 'foot_r',
+            'ik_hand_root': 'root',
+            'ik_hand_gun': 'hand_r',
+            'ik_hand_l': 'hand_l',
+            'ik_hand_r': 'hand_r',
+        }
+        root_bone=armature.data.edit_bones['root']
+        for bone in ue_ik_bones:
+            new_bone=armature.data.edit_bones.new(bone)
+            new_bone.head = armature.data.edit_bones[ue_ik_bones[bone]].head
+            new_bone.tail = armature.data.edit_bones[ue_ik_bones[bone]].tail
+            new_bone.parent = root_bone
+
+        armature.data.edit_bones['ik_foot_l'].parent = armature.data.edit_bones['ik_foot_root']
+        armature.data.edit_bones['ik_foot_r'].parent = armature.data.edit_bones['ik_foot_root']
+        armature.data.edit_bones['ik_hand_gun'].parent = armature.data.edit_bones['ik_hand_root']
+        armature.data.edit_bones['ik_hand_l'].parent = armature.data.edit_bones['ik_hand_gun']
+        armature.data.edit_bones['ik_hand_r'].parent = armature.data.edit_bones['ik_hand_gun']
+
+        bpy.ops.kkbp.cats_merge_weights()
+
+    # If exporting for MMD...
     if prep_type == 'C':
-        #Create the empty
+        # Create the empty
         bpy.ops.object.mode_set(mode='OBJECT')
-        bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=(0, 0, 0))
+        bpy.ops.object.empty_add(
+            type='PLAIN_AXES', align='WORLD', location=(0, 0, 0))
         empty = bpy.data.objects['Empty']
         bpy.ops.object.select_all(action='DESELECT')
         armature.parent = empty
         bpy.context.view_layer.objects.active = armature
 
-        #rename bones to stock
+        # rename bones to stock
         if armature.data.bones.get('Center'):
             bpy.ops.kkbp.switcharmature('INVOKE_DEFAULT')
-        
-        #then rename bones to japanese
+
+        # then rename bones to japanese
         pmx_rename_dict = {
-        '全ての親':'cf_n_height',
-        'センター':'cf_j_hips',
-        '上半身':'cf_j_spine01',
-        '上半身２':'cf_j_spine02',
-        '上半身３':'cf_j_spine03',
-        '首':'cf_j_neck',
-        '頭':'cf_j_head',
-        '両目':'Eyesx',
-        '左目':'cf_J_hitomi_tx_L',
-        '右目':'cf_J_hitomi_tx_R',
-        '左腕':'cf_j_arm00_L',
-        '右腕':'cf_j_arm00_R',
-        '左ひじ':'cf_j_forearm01_L',
-        '右ひじ':'cf_j_forearm01_R',
-        '左肩':'cf_j_shoulder_L',
-        '右肩':'cf_j_shoulder_R',
-        '左手首':'cf_j_hand_L',
-        '右手首':'cf_j_hand_R',
-        '左親指０':'cf_j_thumb01_L',
-        '左親指１':'cf_j_thumb02_L',
-        '左親指２':'cf_j_thumb03_L',
-        '左薬指１':'cf_j_ring01_L',
-        '左薬指２':'cf_j_ring02_L',
-        '左薬指３':'cf_j_ring03_L',
-        '左中指１':'cf_j_middle01_L',
-        '左中指２':'cf_j_middle02_L',
-        '左中指３':'cf_j_middle03_L',
-        '左小指１':'cf_j_little01_L',
-        '左小指２':'cf_j_little02_L',
-        '左小指３':'cf_j_little03_L',
-        '左人指１':'cf_j_index01_L',
-        '左人指２':'cf_j_index02_L',
-        '左人指３':'cf_j_index03_L',
-        '右親指０':'cf_j_thumb01_R',
-        '右親指１':'cf_j_thumb02_R',
-        '右親指２':'cf_j_thumb03_R',
-        '右薬指１':'cf_j_ring01_R',
-        '右薬指２':'cf_j_ring02_R',
-        '右薬指３':'cf_j_ring03_R',
-        '右中指１':'cf_j_middle01_R',
-        '右中指２':'cf_j_middle02_R',
-        '右中指３':'cf_j_middle03_R',
-        '右小指１':'cf_j_little01_R',
-        '右小指２':'cf_j_little02_R',
-        '右小指３':'cf_j_little03_R',
-        '右人指１':'cf_j_index01_R',
-        '右人指２':'cf_j_index02_R',
-        '右人指３':'cf_j_index03_R',
-        '下半身':'cf_j_waist01',
-        '左足':'cf_j_thigh00_L',
-        '右足':'cf_j_thigh00_R',
-        '左ひざ':'cf_j_leg01_L',
-        '右ひざ':'cf_j_leg01_R',
-        '左足首':'cf_j_leg03_L',
-        '右足首':'cf_j_leg03_R',
+            '全ての親': 'cf_n_height',
+            'センター': 'cf_j_hips',
+            '上半身': 'cf_j_spine01',
+            '上半身２': 'cf_j_spine02',
+            '上半身３': 'cf_j_spine03',
+            '首': 'cf_j_neck',
+            '頭': 'cf_j_head',
+            '両目': 'Eyesx',
+            '左目': 'cf_J_hitomi_tx_L',
+            '右目': 'cf_J_hitomi_tx_R',
+            '左腕': 'cf_j_arm00_L',
+            '右腕': 'cf_j_arm00_R',
+            '左ひじ': 'cf_j_forearm01_L',
+            '右ひじ': 'cf_j_forearm01_R',
+            '左肩': 'cf_j_shoulder_L',
+            '右肩': 'cf_j_shoulder_R',
+            '左手首': 'cf_j_hand_L',
+            '右手首': 'cf_j_hand_R',
+            '左親指０': 'cf_j_thumb01_L',
+            '左親指１': 'cf_j_thumb02_L',
+            '左親指２': 'cf_j_thumb03_L',
+            '左薬指１': 'cf_j_ring01_L',
+            '左薬指２': 'cf_j_ring02_L',
+            '左薬指３': 'cf_j_ring03_L',
+            '左中指１': 'cf_j_middle01_L',
+            '左中指２': 'cf_j_middle02_L',
+            '左中指３': 'cf_j_middle03_L',
+            '左小指１': 'cf_j_little01_L',
+            '左小指２': 'cf_j_little02_L',
+            '左小指３': 'cf_j_little03_L',
+            '左人指１': 'cf_j_index01_L',
+            '左人指２': 'cf_j_index02_L',
+            '左人指３': 'cf_j_index03_L',
+            '右親指０': 'cf_j_thumb01_R',
+            '右親指１': 'cf_j_thumb02_R',
+            '右親指２': 'cf_j_thumb03_R',
+            '右薬指１': 'cf_j_ring01_R',
+            '右薬指２': 'cf_j_ring02_R',
+            '右薬指３': 'cf_j_ring03_R',
+            '右中指１': 'cf_j_middle01_R',
+            '右中指２': 'cf_j_middle02_R',
+            '右中指３': 'cf_j_middle03_R',
+            '右小指１': 'cf_j_little01_R',
+            '右小指２': 'cf_j_little02_R',
+            '右小指３': 'cf_j_little03_R',
+            '右人指１': 'cf_j_index01_R',
+            '右人指２': 'cf_j_index02_R',
+            '右人指３': 'cf_j_index03_R',
+            '下半身': 'cf_j_waist01',
+            '左足': 'cf_j_thigh00_L',
+            '右足': 'cf_j_thigh00_R',
+            '左ひざ': 'cf_j_leg01_L',
+            '右ひざ': 'cf_j_leg01_R',
+            '左足首': 'cf_j_leg03_L',
+            '右足首': 'cf_j_leg03_R',
         }
 
         for bone in pmx_rename_dict:
             armature.data.bones[pmx_rename_dict[bone]].name = bone
-        
-        #Rearrange bones to match a random pmx model I found 
+
+        # Rearrange bones to match a random pmx model I found
         bpy.ops.object.mode_set(mode='EDIT')
         armature.data.edit_bones['左肩'].parent = armature.data.edit_bones['上半身３']
         armature.data.edit_bones['右肩'].parent = armature.data.edit_bones['上半身３']
         armature.data.edit_bones['左足'].parent = armature.data.edit_bones['下半身']
         armature.data.edit_bones['右足'].parent = armature.data.edit_bones['下半身']
 
-        #refresh the vertex groups? Bones will act as if they're detached if this isn't done
-        body.vertex_groups.active=body.vertex_groups['BodyTop']
+        # refresh the vertex groups? Bones will act as if they're detached if this isn't done
+        body.vertex_groups.active = body.vertex_groups['BodyTop']
 
-        #combine all objects into one
+        # combine all objects into one
 
-        #create leg IKs?
-        
+        # create leg IKs?
+
         c.kklog('Using CATS to simplify more bones for MMD...')
 
-        #use mmd_tools to convert
+        # use mmd_tools to convert
         bpy.ops.mmd_tools.convert_to_mmd_model()
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
+
 def show_bones():
-    #show all bones on the armature
+    # show all bones on the armature
     bpy.ops.object.mode_set(mode='POSE')
     allLayers = [True, True, True, True, True, True, True, True,
-                True, True, True, True, True, True, True, True,
-                True, True, True, True, True, True, True, True,
-                True, True, True, True, True, True, True, True]
+                 True, True, True, True, True, True, True, True,
+                 True, True, True, True, True, True, True, True,
+                 True, True, True, True, True, True, True, True]
     bpy.data.objects['Armature'].data.layers = allLayers
     bpy.ops.pose.select_all(action='DESELECT')
+
 
 class export_prep(bpy.types.Operator):
     bl_idname = "kkbp.exportprep"
     bl_label = "Prep for target application"
     bl_description = t('export_prep_tt')
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
         scene = context.scene.kkbp
         prep_type = scene.prep_dropdown
@@ -289,11 +382,11 @@ class export_prep(bpy.types.Operator):
             c.toggle_console()
             return {'FINISHED'}
         except:
-            c.kklog('Unknown python error occurred', type = 'error')
+            c.kklog('Unknown python error occurred', type='error')
             c.kklog(traceback.format_exc())
             self.report({'ERROR'}, traceback.format_exc())
             return {"CANCELLED"}
-    
+
 
 if __name__ == "__main__":
     bpy.utils.register_class(export_prep)
