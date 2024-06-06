@@ -125,6 +125,14 @@ def main(prep_type, simp_type, separate_hair):
         bpy.ops.armature.separate()
         new_armature = bpy.data.objects['Armature.001']
         new_armature.name = "Hair"
+        bpy.context.view_layer.objects.active = new_armature
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        #root_bone = new_armature.data.edit_bones.new('root')
+        new_armature.data.edit_bones['cf_J_hairB_top'].name = 'hair_back'
+        new_armature.data.edit_bones['cf_J_hairF_top'].name = 'hair_front'
+        #new_armature.data.edit_bones['hair_back'].parent = root_bone
+        #new_armature.data.edit_bones['hair_front'].parent = root_bone
 
         # Move hair meshes to the new armature
         bpy.ops.object.mode_set(mode='OBJECT')
@@ -176,7 +184,6 @@ def main(prep_type, simp_type, separate_hair):
         bpy.ops.object.mode_set(mode='EDIT')
 
         ue_rename_dict = {
-            'BodyTop': 'root',
             'cf_j_hips': 'pelvis',
             'cf_j_waist02': 'spine_01',
             'cf_j_waist01': 'spine_02',
@@ -209,12 +216,13 @@ def main(prep_type, simp_type, separate_hair):
             if armature.data.bones.get(bone):
                 armature.data.bones[bone].name = ue_rename_dict[bone]
 
-        armature.data.edit_bones['pelvis'].parent = armature.data.edit_bones['root']
         armature.data.edit_bones['spine_01'].parent = armature.data.edit_bones['pelvis']
         armature.data.edit_bones['spine_02'].parent = armature.data.edit_bones['spine_01']
         armature.data.edit_bones['spine_03'].parent = armature.data.edit_bones['spine_02']
         armature.data.edit_bones['thigh_l'].parent = armature.data.edit_bones['pelvis']
         armature.data.edit_bones['thigh_r'].parent = armature.data.edit_bones['pelvis']
+        armature.data.edit_bones['pelvis'].parent = None
+        armature.data.edit_bones.remove(armature.data.edit_bones['BodyTop'])
 
         '''private_parts = armature.data.edit_bones.new("private")
         private_parts.head = (0,0,0.8)
@@ -225,24 +233,26 @@ def main(prep_type, simp_type, separate_hair):
 
         for bone_remove in armature.data.edit_bones['cf_n_height'].children_recursive:
             armature.data.edit_bones.remove(bone_remove)
-        armature.data.edit_bones.remove(
-            armature.data.edit_bones['cf_n_height'])
+        armature.data.edit_bones.remove(armature.data.edit_bones['cf_n_height'])
 
         ue_ik_bones = {
-            'ik_foot_root': 'root',
             'ik_foot_l': 'foot_l',
             'ik_foot_r': 'foot_r',
-            'ik_hand_root': 'root',
             'ik_hand_gun': 'hand_r',
             'ik_hand_l': 'hand_l',
             'ik_hand_r': 'hand_r',
         }
-        root_bone=armature.data.edit_bones['root']
+
+        ik_foot_root=armature.data.edit_bones.new('ik_foot_root')
+        ik_foot_root.head = (0,0,0)
+        ik_foot_root.tail = (0,0,0.01)
+        ik_hand_root=armature.data.edit_bones.new('ik_hand_root')
+        ik_hand_root.head = (0,0,0)
+        ik_hand_root.tail = (0,0,0.01)
         for bone in ue_ik_bones:
             new_bone=armature.data.edit_bones.new(bone)
             new_bone.head = armature.data.edit_bones[ue_ik_bones[bone]].head
             new_bone.tail = armature.data.edit_bones[ue_ik_bones[bone]].tail
-            new_bone.parent = root_bone
 
         armature.data.edit_bones['ik_foot_l'].parent = armature.data.edit_bones['ik_foot_root']
         armature.data.edit_bones['ik_foot_r'].parent = armature.data.edit_bones['ik_foot_root']
