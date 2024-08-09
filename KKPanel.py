@@ -90,6 +90,18 @@ class PlaceholderProperties(PropertyGroup):
     separate_hair_bool : BoolProperty(
     description=t('separate_hair_tt'),
     default = False)
+
+    separate_head_bool : BoolProperty(
+    description=t('separate_head_tt'),
+    default = False)
+
+    remove_skirt_bool : BoolProperty(
+    description=t('remove_skirt_tt'),
+    default = False)
+
+    remove_breast_bool : BoolProperty(
+    description=t('remove_breast'),
+    default = False)
     
     bake_light_bool : BoolProperty(
     description=t('bake_light_tt'),
@@ -259,6 +271,11 @@ class EXPORTING_PT_panel(bpy.types.Panel):
         split.prop(context.scene.kkbp, "simp_dropdown")
         split.prop(context.scene.kkbp, "prep_dropdown")
         split.prop(context.scene.kkbp, "separate_hair_bool", toggle=True, text = t('separate_hair'))
+        row = col.row(align=True)
+        split = row.split(align=True, factor=0.33)
+        split.prop(context.scene.kkbp, "separate_head_bool", toggle=True, text = t('separate_head'))
+        split.prop(context.scene.kkbp, "remove_skirt_bool", toggle=True, text = t('remove_skirt'))
+        split.prop(context.scene.kkbp, "remove_breast_bool", toggle=True, text = t('remove_breast'))
         row.enabled = scene.plugin_state not in ['prepped']
 
         col = box.column(align=True)
