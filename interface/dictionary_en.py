@@ -80,6 +80,8 @@ translation_dictionary = {
     'separate_hair' : 'Separate hair',
     'separate_hair_tt' : 'Separate the hair and it\'s skeleton, this will be useful if you want to replace the hair after exporting to the target application',
     'separate_head' : 'Separate head',
+    'remove_skirt' : 'Remove skirt bones',
+    'remove_breast' : 'Remove breast bones',
 
     'bake'          : 'Bake material templates',
     'bake_light'    : "Light",
