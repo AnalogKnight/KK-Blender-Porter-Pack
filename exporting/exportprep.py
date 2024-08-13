@@ -7,7 +7,7 @@ from .. import common as c
 from ..interface.dictionary_en import t
 
 
-def main(prep_type, simp_type, separate_hair):
+def main(prep_type, simp_type, separate_hair, separate_head):
 
     armature = bpy.data.objects['Armature']
 
@@ -82,6 +82,99 @@ def main(prep_type, simp_type, separate_hair):
     bpy.context.view_layer.objects.active = bpy.data.objects['Armature']
     bpy.ops.object.mode_set(mode='POSE')
 
+    # if separate the hair...
+    if separate_hair:
+        show_bones()
+
+        armature = bpy.data.objects['Armature']
+        # Select bones on layer 10
+        for hair_part in ['ct_hairB', 'ct_hairF', 'ct_hairS', 'ct_hairO_01']:
+            for bone in armature.data.bones[hair_part].children_recursive:
+                bone.select = True
+            armature.data.bones[hair_part].select = True
+
+        # Separate the hair bones to a new armature
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.armature.separate()
+        new_armature = bpy.data.objects['Armature.001']
+        new_armature.name = "HairArmature"
+        bpy.context.view_layer.objects.active = new_armature
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        #root_bone = new_armature.data.edit_bones.new('root')
+        new_armature.data.edit_bones['ct_hairB'].name = 'hair_back'
+        new_armature.data.edit_bones['ct_hairF'].name = 'hair_front'
+        new_armature.data.edit_bones['ct_hairS'].name = 'hair_side'
+        #new_armature.data.edit_bones['hair_back'].parent = root_bone
+        #new_armature.data.edit_bones['hair_front'].parent = root_bone
+
+        for bone in new_armature.data.edit_bones:
+            for keyword_delete in ['cf_hit_', 'k_f_', 'a_n_', 'n_cam_', 'ct_']:
+                if keyword_delete in bone.name.lower():
+                    new_armature.data.edit_bones.remove(bone)
+                    break
+
+        # Move hair meshes to the new armature
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.select_all(action="DESELECT")
+        bpy.data.objects['Hair Outfit 00'].select_set(True)
+        bpy.context.view_layer.objects.active = new_armature
+        bpy.ops.object.parent_set(type='ARMATURE')
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.select_all(action='DESELECT')
+
+    if separate_head:
+        show_bones()
+
+        armature = bpy.data.objects['Armature']
+        bpy.context.view_layer.objects.active = armature
+        armature.data.bones['cf_s_head'].select = True
+        for bone in armature.data.bones['cf_s_head'].children_recursive:
+            bone.select = True
+
+        # Separate the head bones to a new armature
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.armature.separate()
+        new_armature = bpy.data.objects['Armature.001']
+        new_armature.name = "HeadArmature"
+        bpy.context.view_layer.objects.active = bpy.data.objects['Body']
+        bpy.data.objects['Body'].select = True
+        bpy.ops.mesh.separate(type='MATERIAL')
+        bpy.data.objects['Body'].select = False
+        head = bpy.data.objects['Body.002']
+        bpy.context.view_layer.objects.active = head
+        bpy.ops.object.join()
+        head.name = "Head"
+
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.select_all(action="DESELECT")
+        bpy.context.view_layer.objects.active = new_armature
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        for bone in new_armature.data.edit_bones:
+            if 'cf_s' in bone.name.lower():
+                bone.name = 'deform' + str(bone.name)[4:]
+
+        for bone in new_armature.data.edit_bones:
+            if 'cf_j' in bone.name.lower():
+                bone.name = 'joint' + str(bone.name)[4:]
+
+        for parts_remove in ['ct_head']:
+            for bone in new_armature.data.edit_bones[parts_remove].children_recursive:
+                new_armature.data.edit_bones.remove(bone)
+
+        for bone in new_armature.data.edit_bones:
+            for keyword_delete in ['cf_hit_', 'k_f_', 'a_n_', 'n_cam_', 'ct_']:
+                if keyword_delete in bone.name.lower():
+                    new_armature.data.edit_bones.remove(bone)
+                    break
+
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.select_all(action="DESELECT")
+        head.select = True
+        bpy.context.view_layer.objects.active = new_armature
+        bpy.ops.object.parent_set(type='ARMATURE')
+
     # If simplifying the bones...
     if simp_type in ['A', 'B']:
         show_bones()
@@ -110,36 +203,6 @@ def main(prep_type, simp_type, separate_hair):
         c.kklog('Using the merge weights function in CATS to simplify bones...')
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.kkbp.cats_merge_weights()
-
-    # if separate the hair...
-    if separate_hair:
-        show_bones()
-
-        # Select bones on layer 10
-        for bone in armature.data.bones:
-            if bone.layers[9] == True:
-                bone.select = True
-
-        # Separate the hair bones to a new armature
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.armature.separate()
-        new_armature = bpy.data.objects['Armature.001']
-        new_armature.name = "Hair"
-        bpy.context.view_layer.objects.active = new_armature
-        bpy.ops.object.mode_set(mode='EDIT')
-
-        #root_bone = new_armature.data.edit_bones.new('root')
-        new_armature.data.edit_bones['cf_J_hairB_top'].name = 'hair_back'
-        new_armature.data.edit_bones['cf_J_hairF_top'].name = 'hair_front'
-        #new_armature.data.edit_bones['hair_back'].parent = root_bone
-        #new_armature.data.edit_bones['hair_front'].parent = root_bone
-
-        # Move hair meshes to the new armature
-        bpy.ops.object.mode_set(mode='OBJECT')
-        bpy.ops.object.select_all(action="DESELECT")
-        bpy.data.objects['Hair Outfit 00'].select_set(True)
-        bpy.context.view_layer.objects.active = new_armature
-        bpy.ops.object.parent_set(type='ARMATURE')
 
     # If exporting for VRM or VRC...
     if prep_type in ['A', 'D']:
@@ -180,16 +243,38 @@ def main(prep_type, simp_type, separate_hair):
 
     # If exporting for Unreal...
     if prep_type == 'E':
+        armature = bpy.data.objects['Armature']
         bpy.context.view_layer.objects.active = armature
+
         bpy.ops.object.mode_set(mode='EDIT')
+        armature.data.edit_bones['cf_j_waist02'].parent = armature.data.edit_bones['cf_j_hips']
+        armature.data.edit_bones['cf_j_waist01'].parent = armature.data.edit_bones['cf_j_waist02']
+
+        bpy.ops.object.mode_set(mode='POSE')
+        bpy.ops.pose.select_all(action='DESELECT')
+
+        armature.data.bones['cf_j_foot_L'].select = True
+        armature.data.bones['cf_j_foot_R'].select = True
+        armature.data.bones['cf_j_waist02'].select = True
+        armature.data.bones['cf_s_waist02'].select = True
+        #armature.data.bones['cf_j_waist01'].select = True
+        #armature.data.bones['cf_s_waist01'].select = True
+        #armature.data.bones['cf_j_spine01'].select = True
+        #armature.data.bones['cf_s_spine01'].select = True
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.kkbp.cats_merge_weights()
+
+        armature.data.edit_bones['cf_s_leg_R'].parent = armature.data.edit_bones['cf_j_hips']
+        armature.data.edit_bones['cf_s_leg_L'].parent = armature.data.edit_bones['cf_j_hips']
 
         ue_rename_dict = {
             'cf_j_hips': 'pelvis',
-            'cf_j_waist02': 'spine_01',
-            'cf_j_waist01': 'spine_02',
-            'cf_j_spine01': 'spine_03',
-            'cf_j_spine02': 'spine_04',
-            'cf_j_spine03': 'spine_05',
+            #'cf_j_waist02': 'spine_01',
+            'cf_j_waist01': 'spine_01',
+            'cf_j_spine01': 'spine_02',
+            'cf_j_spine02': 'spine_03',
+            'cf_j_spine03': 'spine_04',
             'cf_j_neck': 'neck',
             'cf_j_head': 'head',
             'cf_j_shoulder_L': 'clavicle_l',
@@ -210,7 +295,39 @@ def main(prep_type, simp_type, separate_hair):
             'cf_j_leg03_L': 'foot_l',
             'cf_j_leg03_R': 'foot_r',
             'cf_j_toes_L': 'ball_l',
-            'cf_j_toes_R': 'ball_r'
+            'cf_j_toes_R': 'ball_r',
+
+            'cf_j_index01_L': 'index_01_l',
+            'cf_j_index02_L': 'index_02_l',
+            'cf_j_index03_L': 'index_03_l',
+            'cf_j_little01_L': 'pinky_01_l',
+            'cf_j_little02_L': 'pinky_02_l',
+            'cf_j_little03_L': 'pinky_03_l',
+            'cf_j_middle01_L': 'middle_01_l',
+            'cf_j_middle02_L': 'middle_02_l',
+            'cf_j_middle03_L': 'middle_03_l',
+            'cf_j_ring01_L': 'ring_01_l',
+            'cf_j_ring02_L': 'ring_02_l',
+            'cf_j_ring03_L': 'ring_03_l',
+            'cf_j_thumb01_L': 'thumb_01_l',
+            'cf_j_thumb02_L': 'thumb_02_l',
+            'cf_j_thumb03_L': 'thumb_03_l',
+
+            'cf_j_index01_R': 'index_01_r',
+            'cf_j_index02_R': 'index_02_r',
+            'cf_j_index03_R': 'index_03_r',
+            'cf_j_little01_R': 'pinky_01_r',
+            'cf_j_little02_R': 'pinky_02_r',
+            'cf_j_little03_R': 'pinky_03_r',
+            'cf_j_middle01_R': 'middle_01_r',
+            'cf_j_middle02_R': 'middle_02_r',
+            'cf_j_middle03_R': 'middle_03_r',
+            'cf_j_ring01_R': 'ring_01_r',
+            'cf_j_ring02_R': 'ring_02_r',
+            'cf_j_ring03_R': 'ring_03_r',
+            'cf_j_thumb01_R': 'thumb_01_r',
+            'cf_j_thumb02_R': 'thumb_02_r',
+            'cf_j_thumb03_R': 'thumb_03_r'
         }
         for bone in ue_rename_dict:
             if armature.data.bones.get(bone):
@@ -231,16 +348,25 @@ def main(prep_type, simp_type, separate_hair):
         for private_part in ['cf_d_siri_L','cf_d_ana','cf_d_kokan','cf_d_siri_R','cf_d_sirihit_L','cf_d_sirihit_R']:
             armature.data.edit_bones[private_part].parent = private_parts'''
 
-        for bone_remove in armature.data.edit_bones['cf_n_height'].children_recursive:
-            armature.data.edit_bones.remove(bone_remove)
-        armature.data.edit_bones.remove(armature.data.edit_bones['cf_n_height'])
+        for parts_remove in ['cf_n_height','cf_d_siri_L','cf_d_ana','cf_d_kokan','cf_d_siri_R','cf_d_sirihit_L','cf_d_sirihit_R','p_cf_body_bone','p_cf_body_00','HeadRef']:
+            for bone in armature.data.edit_bones[parts_remove].children_recursive:
+                armature.data.edit_bones.remove(bone)
+            armature.data.edit_bones.remove(armature.data.edit_bones[parts_remove])
+
+        for bone in armature.data.edit_bones:
+            if 'cf_s' in bone.name.lower():
+                bone.name = 'deform' + str(bone.name)[4:]
+
+        for bone in armature.data.edit_bones:
+            if 'cf_j' in bone.name.lower():
+                bone.name = 'joint' + str(bone.name)[4:]
 
         ue_ik_bones = {
             'ik_foot_l': 'foot_l',
             'ik_foot_r': 'foot_r',
             'ik_hand_gun': 'hand_r',
             'ik_hand_l': 'hand_l',
-            'ik_hand_r': 'hand_r',
+            'ik_hand_r': 'hand_r'
         }
 
         ik_foot_root=armature.data.edit_bones.new('ik_foot_root')
@@ -260,7 +386,48 @@ def main(prep_type, simp_type, separate_hair):
         armature.data.edit_bones['ik_hand_l'].parent = armature.data.edit_bones['ik_hand_gun']
         armature.data.edit_bones['ik_hand_r'].parent = armature.data.edit_bones['ik_hand_gun']
 
+        bpy.ops.object.mode_set(mode='POSE')
+        bpy.ops.pose.select_all(action='DESELECT')
+        for bone in armature.data.bones:
+            for keyword in ['vagina','k_f_','cf_d_','cf_hit_','backsk']:
+                if keyword in bone.name.lower():
+                    bone.select = True
+
+        bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.kkbp.cats_merge_weights()
+
+        for bone in armature.data.edit_bones:
+            for keyword_delete in ['vagina','k_f_','cf_d_','cf_hit_','ct_','backsk']:
+                if keyword_delete in bone.name.lower():
+                    armature.data.edit_bones.remove(bone)
+                    break
+
+        replace_dict = {
+            '_L': '_l',
+            '_R': '_r',
+
+            '_shoulder': '_clavicle',
+            '_arm': '_upperarm',
+            '_forearm': '_lowerarm',
+
+            '_leg': '_calf',
+
+            '_waist01': '_spine_01',
+            '_spine01': '_spine_02',
+            '_spine02': '_spine_03',
+            '_spine03': '_spine_04',
+
+            '_sk_': '_skirt_'
+        }
+
+        for keyword in replace_dict:
+            for bone in armature.data.bones:
+                if keyword in bone.name:
+                    bone.name = bone.name.replace(keyword, replace_dict[keyword])
+
+        pelvis=armature.data.edit_bones['pelvis']
+        pelvis.head = (0,0,0.883546)
+        pelvis.tail = (0,0,0.96688)
 
     # If exporting for MMD...
     if prep_type == 'C':
@@ -383,10 +550,11 @@ class export_prep(bpy.types.Operator):
         prep_type = scene.prep_dropdown
         simp_type = scene.simp_dropdown
         separate_hair = scene.separate_hair_bool
+        separate_head = scene.separate_head_bool
         last_step = time.time()
         try:
             c.toggle_console()
-            main(prep_type, simp_type, separate_hair)
+            main(prep_type, simp_type, separate_hair, separate_head)
             scene.plugin_state = 'prepped'
             c.kklog('Finished in ' + str(time.time() - last_step)[0:4] + 's')
             c.toggle_console()

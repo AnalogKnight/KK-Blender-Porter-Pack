@@ -75,6 +75,8 @@ translation_dictionary = {
 
     'separate_hair' : '分离头发',
     'separate_hair_tt' : '将头发同其骨骼一起分离，如果您要在导出模型到目标应用程序后更换不同的发型，这将有用处',
+    'separate_head' : '分离头发',
+    'separate_head_tt' : '将头发同其骨骼一起分离，如果您要在导出模型到目标应用程序后更换不同的发型，这将有用处',
 
     'bake'          : '烘焙材质模板',
     'bake_light'    : "亮色",
