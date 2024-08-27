@@ -191,11 +191,6 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         for private_part in ['cf_d_siri_L','cf_d_ana','cf_d_kokan','cf_d_siri_R','cf_d_sirihit_L','cf_d_sirihit_R']:
             armature.data.edit_bones[private_part].parent = private_parts'''
 
-        for parts_remove in ['cf_n_height','cf_d_siri_L','cf_d_ana','cf_d_kokan','cf_d_siri_R','cf_d_sirihit_L','cf_d_sirihit_R','p_cf_body_bone','p_cf_body_00','HeadRef','cf_j_spinesk_00', 'ct_head']:
-            for bone in armature.data.edit_bones[parts_remove].children_recursive:
-                armature.data.edit_bones.remove(bone)
-            armature.data.edit_bones.remove(armature.data.edit_bones[parts_remove])
-
         ue_ik_bones = {
             'ik_foot_l': 'foot_l',
             'ik_foot_r': 'foot_r',
@@ -262,6 +257,12 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         pelvis.head = (0,0,0.883546)
         pelvis.tail = (0,0,0.96688)
 
+        root=armature.data.edit_bones.new('root')
+        root.head = (0,0,0)
+        root.tail = (0,0,0.01)
+        for child in ['pelvis','ik_foot_root','ik_hand_root']:
+            armature.data.edit_bones[child].parent = root
+
         bpy.ops.object.mode_set(mode='POSE')
         bpy.ops.pose.select_all(action='DESELECT')
 
@@ -276,15 +277,21 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
             armature.data.bones['breasts'].select = True
 
         for bone in armature.data.bones:
-            for keyword_merge in ['vagina','k_f_','cf_d_','cf_hit_','backsk']:
+            for keyword_merge in ['vagina', 'k_f_', 'cf_hit_', 'backsk', 'siri', 'kokan', 'ana']:
                 if keyword_merge in bone.name.lower():
                     bone.select = True
 
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.kkbp.cats_merge_weights()
 
+        for parts_remove in ['cf_n_height', 'p_cf_body_bone', 'p_cf_body_00', 'HeadRef', 'joint_spinesk_00', 'ct_head']:
+            for bone in armature.data.edit_bones[parts_remove].children_recursive:
+                armature.data.edit_bones.remove(bone)
+            armature.data.edit_bones.remove(
+                armature.data.edit_bones[parts_remove])
+
         for bone in armature.data.edit_bones:
-            for keyword_delete in ['vagina','k_f_','cf_d_','cf_hit_','ct_','backsk','a_n','collider', 'n_cam_']:
+            for keyword_delete in ['vagina', 'k_f_', 'cf_hit_', 'ct_', 'backsk', 'a_n', 'collider', 'n_cam_', 'aim', 'siri', 'kokan', 'ana']:
                 if keyword_delete in bone.name.lower():
                     armature.data.edit_bones.remove(bone)
                     break
@@ -308,6 +315,11 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
             bpy.context.view_layer.objects.active = new_armature
             bpy.ops.object.mode_set(mode='EDIT')
 
+            root=new_armature.data.edit_bones.new('root')
+            root.head = (0,0,0)
+            root.tail = (0,0,0.01)
+            for child in ['hair_back','hair_front','hair_side']:
+                new_armature.data.edit_bones[child].parent = root
             #root_bone = new_armature.data.edit_bones.new('root')
             #new_armature.data.edit_bones['hair_back'].parent = root_bone
             #new_armature.data.edit_bones['hair_front'].parent = root_bone
@@ -335,6 +347,15 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
             bpy.ops.armature.separate()
             new_armature = bpy.data.objects['Armature.001']
             new_armature.name = "HeadArmature"
+            bpy.context.view_layer.objects.active = new_armature
+            bpy.ops.object.mode_set(mode='EDIT')
+            
+            root=new_armature.data.edit_bones.new('root')
+            root.head = (0,0,0)
+            root.tail = (0,0,0.01)
+            for child in ['joint_tang_01','N_EyesLookTargetP','p_cf_head_bone']:
+                new_armature.data.edit_bones[child].parent = root
+
             bpy.context.view_layer.objects.active = bpy.data.objects['Body']
             bpy.data.objects['Body'].select = True
             bpy.ops.mesh.separate(type='MATERIAL')
