@@ -200,11 +200,11 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         }
 
         ik_foot_root=armature.data.edit_bones.new('ik_foot_root')
-        ik_foot_root.head = (0,0,0)
-        ik_foot_root.tail = (0,0,0.01)
+        ik_foot_root.head = (0,0,0.013)
+        ik_foot_root.tail = (0,0,0.023)
         ik_hand_root=armature.data.edit_bones.new('ik_hand_root')
-        ik_hand_root.head = (0,0,0)
-        ik_hand_root.tail = (0,0,0.01)
+        ik_hand_root.head = (0,0,0.013)
+        ik_hand_root.tail = (0,0,0.023)
         for bone in ue_ik_bones:
             new_bone=armature.data.edit_bones.new(bone)
             new_bone.head = armature.data.edit_bones[ue_ik_bones[bone]].head
@@ -257,11 +257,11 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         pelvis.head = (0,0,0.883546)
         pelvis.tail = (0,0,0.96688)
 
-        root=armature.data.edit_bones.new('root')
-        root.head = (0,0,0)
-        root.tail = (0,0,0.01)
+        '''root=armature.data.edit_bones.new('root')
+        root.head = (0,0,0.013)
+        root.tail = (0,0,0.023)
         for child in ['pelvis','ik_foot_root','ik_hand_root']:
-            armature.data.edit_bones[child].parent = root
+            armature.data.edit_bones[child].parent = root'''
 
         bpy.ops.object.mode_set(mode='POSE')
         bpy.ops.pose.select_all(action='DESELECT')
@@ -277,7 +277,7 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
             armature.data.bones['breasts'].select = True
 
         for bone in armature.data.bones:
-            for keyword_merge in ['vagina', 'k_f_', 'cf_hit_', 'backsk', 'siri', 'kokan', 'ana']:
+            for keyword_merge in ['cf_d', 'vagina', 'k_f_', 'cf_hit_', 'backsk', 'siri', 'kokan', '_ana', 'cm_j_dan', '_pee', 'deform_hand']:
                 if keyword_merge in bone.name.lower():
                     bone.select = True
 
@@ -291,7 +291,7 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
                 armature.data.edit_bones[parts_remove])
 
         for bone in armature.data.edit_bones:
-            for keyword_delete in ['vagina', 'k_f_', 'cf_hit_', 'ct_', 'backsk', 'a_n', 'collider', 'n_cam_', 'aim', 'siri', 'kokan', 'ana']:
+            for keyword_delete in ['cf_d', 'vagina', 'k_f_', 'cf_hit_', 'ct_', 'backsk', 'a_n', 'ollider', 'n_cam_', 'aim', 'siri', 'kokan', '_ana', 'cm_j_dan', '_pee', 'deform_hand']:
                 if keyword_delete in bone.name.lower():
                     armature.data.edit_bones.remove(bone)
                     break
@@ -315,11 +315,11 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
             bpy.context.view_layer.objects.active = new_armature
             bpy.ops.object.mode_set(mode='EDIT')
 
-            root=new_armature.data.edit_bones.new('root')
-            root.head = (0,0,0)
-            root.tail = (0,0,0.01)
+            '''root=new_armature.data.edit_bones.new('root')
+            root.head = (0,0,0.013)
+            root.tail = (0,0,0.023)
             for child in ['hair_back','hair_front','hair_side']:
-                new_armature.data.edit_bones[child].parent = root
+                new_armature.data.edit_bones[child].parent = root'''
             #root_bone = new_armature.data.edit_bones.new('root')
             #new_armature.data.edit_bones['hair_back'].parent = root_bone
             #new_armature.data.edit_bones['hair_front'].parent = root_bone
@@ -349,12 +349,12 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
             new_armature.name = "HeadArmature"
             bpy.context.view_layer.objects.active = new_armature
             bpy.ops.object.mode_set(mode='EDIT')
-            
-            root=new_armature.data.edit_bones.new('root')
-            root.head = (0,0,0)
-            root.tail = (0,0,0.01)
+
+            '''root=new_armature.data.edit_bones.new('root')
+            root.head = (0,0,0.013)
+            root.tail = (0,0,0.023)
             for child in ['joint_tang_01','N_EyesLookTargetP','p_cf_head_bone']:
-                new_armature.data.edit_bones[child].parent = root
+                new_armature.data.edit_bones[child].parent = root'''
 
             bpy.context.view_layer.objects.active = bpy.data.objects['Body']
             bpy.data.objects['Body'].select = True
