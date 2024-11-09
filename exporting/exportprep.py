@@ -4,7 +4,7 @@ import bpy, traceback, time
 from .. import common as c
 from ..interface.dictionary_en import t
 
-def main(prep_type, simp_type):
+def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remove_breast):
     try:
         #always try to use the atlased model first
         body = bpy.data.objects['Body.001']
@@ -86,6 +86,302 @@ def main(prep_type, simp_type):
     bpy.data.objects[armature_name].select_set(True)
     bpy.context.view_layer.objects.active=bpy.data.objects[armature_name]
     bpy.ops.object.mode_set(mode='POSE')
+
+    # If exporting for Unreal...
+    if prep_type == 'E':
+        armature = bpy.data.objects['Armature']
+        bpy.context.view_layer.objects.active = armature
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        armature.data.edit_bones['cf_j_waist02'].parent = armature.data.edit_bones['cf_j_hips']
+        armature.data.edit_bones['cf_j_waist01'].parent = armature.data.edit_bones['cf_j_waist02']
+
+        bpy.ops.object.mode_set(mode='POSE')
+        bpy.ops.pose.select_all(action='DESELECT')
+
+        armature.data.bones['cf_j_foot_L'].select = True
+        armature.data.bones['cf_j_foot_R'].select = True
+        armature.data.bones['cf_j_waist02'].select = True
+        armature.data.bones['cf_s_waist02'].select = True
+        #armature.data.bones['cf_j_waist01'].select = True
+        #armature.data.bones['cf_s_waist01'].select = True
+        #armature.data.bones['cf_j_spine01'].select = True
+        #armature.data.bones['cf_s_spine01'].select = True
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.kkbp.cats_merge_weights()
+
+        armature.data.edit_bones['cf_s_leg_R'].parent = armature.data.edit_bones['cf_j_hips']
+        armature.data.edit_bones['cf_s_leg_L'].parent = armature.data.edit_bones['cf_j_hips']
+
+        ue_rename_dict = {
+            'cf_j_hips': 'pelvis',
+            #'cf_j_waist02': 'spine_01',
+            'cf_j_waist01': 'spine_01',
+            'cf_j_spine01': 'spine_02',
+            'cf_j_spine02': 'spine_03',
+            'cf_j_spine03': 'spine_04',
+            'cf_j_neck': 'neck',
+            'cf_j_head': 'head',
+            'cf_j_shoulder_L': 'clavicle_l',
+            'cf_j_shoulder_R': 'clavicle_r',
+            'cf_j_arm00_L': 'upperarm_l',
+            'cf_j_arm00_R': 'upperarm_r',
+            'cf_j_forearm01_L': 'lowerarm_l',
+            'cf_j_forearm01_R': 'lowerarm_r',
+            'cf_j_hand_L': 'hand_l',
+            'cf_j_hand_R': 'hand_r',
+            'cf_J_hitomi_tx_L': 'eye_l',
+            'cf_J_hitomi_tx_R': 'eye_r',
+
+            'cf_j_thigh00_L': 'thigh_l',
+            'cf_j_thigh00_R': 'thigh_r',
+            'cf_j_leg01_L': 'calf_l',
+            'cf_j_leg01_R': 'calf_r',
+            'cf_j_leg03_L': 'foot_l',
+            'cf_j_leg03_R': 'foot_r',
+            'cf_j_toes_L': 'ball_l',
+            'cf_j_toes_R': 'ball_r',
+
+            'cf_j_index01_L': 'index_01_l',
+            'cf_j_index02_L': 'index_02_l',
+            'cf_j_index03_L': 'index_03_l',
+            'cf_j_little01_L': 'pinky_01_l',
+            'cf_j_little02_L': 'pinky_02_l',
+            'cf_j_little03_L': 'pinky_03_l',
+            'cf_j_middle01_L': 'middle_01_l',
+            'cf_j_middle02_L': 'middle_02_l',
+            'cf_j_middle03_L': 'middle_03_l',
+            'cf_j_ring01_L': 'ring_01_l',
+            'cf_j_ring02_L': 'ring_02_l',
+            'cf_j_ring03_L': 'ring_03_l',
+            'cf_j_thumb01_L': 'thumb_01_l',
+            'cf_j_thumb02_L': 'thumb_02_l',
+            'cf_j_thumb03_L': 'thumb_03_l',
+
+            'cf_j_index01_R': 'index_01_r',
+            'cf_j_index02_R': 'index_02_r',
+            'cf_j_index03_R': 'index_03_r',
+            'cf_j_little01_R': 'pinky_01_r',
+            'cf_j_little02_R': 'pinky_02_r',
+            'cf_j_little03_R': 'pinky_03_r',
+            'cf_j_middle01_R': 'middle_01_r',
+            'cf_j_middle02_R': 'middle_02_r',
+            'cf_j_middle03_R': 'middle_03_r',
+            'cf_j_ring01_R': 'ring_01_r',
+            'cf_j_ring02_R': 'ring_02_r',
+            'cf_j_ring03_R': 'ring_03_r',
+            'cf_j_thumb01_R': 'thumb_01_r',
+            'cf_j_thumb02_R': 'thumb_02_r',
+            'cf_j_thumb03_R': 'thumb_03_r'
+        }
+        for bone in ue_rename_dict:
+            if armature.data.bones.get(bone):
+                armature.data.bones[bone].name = ue_rename_dict[bone]
+        armature.data.bones['cf_d_sk_top'].name = 'skirt'
+        armature.data.bones['cf_d_bust00'].name = 'breasts'
+
+        armature.data.edit_bones['spine_01'].parent = armature.data.edit_bones['pelvis']
+        armature.data.edit_bones['spine_02'].parent = armature.data.edit_bones['spine_01']
+        armature.data.edit_bones['spine_03'].parent = armature.data.edit_bones['spine_02']
+        armature.data.edit_bones['thigh_l'].parent = armature.data.edit_bones['pelvis']
+        armature.data.edit_bones['thigh_r'].parent = armature.data.edit_bones['pelvis']
+        armature.data.edit_bones['pelvis'].parent = None
+        armature.data.edit_bones.remove(armature.data.edit_bones['BodyTop'])
+
+        '''private_parts = armature.data.edit_bones.new("private")
+        private_parts.head = (0,0,0.8)
+        private_parts.tail = (0,0,0.81)
+        private_parts.parent = armature.data.edit_bones['pelvis']
+        for private_part in ['cf_d_siri_L','cf_d_ana','cf_d_kokan','cf_d_siri_R','cf_d_sirihit_L','cf_d_sirihit_R']:
+            armature.data.edit_bones[private_part].parent = private_parts'''
+
+        ue_ik_bones = {
+            'ik_foot_l': 'foot_l',
+            'ik_foot_r': 'foot_r',
+            'ik_hand_gun': 'hand_r',
+            'ik_hand_l': 'hand_l',
+            'ik_hand_r': 'hand_r'
+        }
+
+        ik_foot_root=armature.data.edit_bones.new('ik_foot_root')
+        ik_foot_root.head = (0,0,0.013)
+        ik_foot_root.tail = (0,0,0.023)
+        ik_hand_root=armature.data.edit_bones.new('ik_hand_root')
+        ik_hand_root.head = (0,0,0.013)
+        ik_hand_root.tail = (0,0,0.023)
+        for bone in ue_ik_bones:
+            new_bone=armature.data.edit_bones.new(bone)
+            new_bone.head = armature.data.edit_bones[ue_ik_bones[bone]].head
+            new_bone.tail = armature.data.edit_bones[ue_ik_bones[bone]].tail
+
+        armature.data.edit_bones['ik_foot_l'].parent = armature.data.edit_bones['ik_foot_root']
+        armature.data.edit_bones['ik_foot_r'].parent = armature.data.edit_bones['ik_foot_root']
+        armature.data.edit_bones['ik_hand_gun'].parent = armature.data.edit_bones['ik_hand_root']
+        armature.data.edit_bones['ik_hand_l'].parent = armature.data.edit_bones['ik_hand_gun']
+        armature.data.edit_bones['ik_hand_r'].parent = armature.data.edit_bones['ik_hand_gun']
+
+        replace_dict = {
+            '_L': '_l',
+            '_R': '_r',
+
+            '_shoulder': '_clavicle',
+            '_arm': '_upperarm',
+            '_forearm': '_lowerarm',
+
+            '_leg': '_calf',
+
+            '_waist01': '_spine_01',
+            '_spine01': '_spine_02',
+            '_spine02': '_spine_03',
+            '_spine03': '_spine_04',
+
+            '_sk_': '_skirt_',
+
+            'shoulder02': 'clavicle',
+
+            'ct_hairB': 'hair_back',
+            'ct_hairF': 'hair_front',
+            'ct_hairS': 'hair_side'
+        }
+
+        for keyword in replace_dict:
+            for bone in armature.data.bones:
+                if keyword in bone.name:
+                    bone.name = bone.name.replace(keyword, replace_dict[keyword])
+        
+        for bone in armature.data.edit_bones:
+            if 'cf_s' in bone.name.lower():
+                bone.name = 'deform' + str(bone.name)[4:]
+
+        for bone in armature.data.edit_bones:
+            if 'cf_j' in bone.name.lower():
+                bone.name = 'joint' + str(bone.name)[4:]
+
+        pelvis=armature.data.edit_bones['pelvis']
+        pelvis.head = (0,0,0.883546)
+        pelvis.tail = (0,0,0.96688)
+
+        '''root=armature.data.edit_bones.new('root')
+        root.head = (0,0,0.013)
+        root.tail = (0,0,0.023)
+        for child in ['pelvis','ik_foot_root','ik_hand_root']:
+            armature.data.edit_bones[child].parent = root'''
+
+        bpy.ops.object.mode_set(mode='POSE')
+        bpy.ops.pose.select_all(action='DESELECT')
+
+        if remove_skirt:
+            for bone in armature.data.bones['skirt'].children_recursive:
+                bone.select = True
+            armature.data.bones['skirt'].select = True
+
+        if remove_breast:
+            for bone in armature.data.bones['breasts'].children_recursive:
+                bone.select = True
+            armature.data.bones['breasts'].select = True
+
+        for bone in armature.data.bones:
+            for keyword_merge in ['cf_d', 'vagina', 'k_f_', 'cf_hit_', 'backsk', 'siri', 'kokan', '_ana', 'cm_j_dan', '_pee', 'deform_hand']:
+                if keyword_merge in bone.name.lower():
+                    bone.select = True
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.kkbp.cats_merge_weights()
+
+        for parts_remove in ['cf_n_height', 'p_cf_body_bone', 'p_cf_body_00', 'HeadRef', 'joint_spinesk_00', 'ct_head']:
+            for bone in armature.data.edit_bones[parts_remove].children_recursive:
+                armature.data.edit_bones.remove(bone)
+            armature.data.edit_bones.remove(
+                armature.data.edit_bones[parts_remove])
+
+        for bone in armature.data.edit_bones:
+            for keyword_delete in ['cf_d', 'vagina', 'k_f_', 'cf_hit_', 'ct_', 'backsk', 'a_n', 'ollider', 'n_cam_', 'aim', 'siri', 'kokan', '_ana', 'cm_j_dan', '_pee', 'deform_hand']:
+                if keyword_delete in bone.name.lower():
+                    armature.data.edit_bones.remove(bone)
+                    break
+
+        # if separate the hair...
+        if separate_hair:
+            show_bones()
+
+            armature = bpy.data.objects['Armature']
+            # Select bones on layer 10
+            for hair_part in ['hair_back', 'hair_front', 'hair_side']:
+                for bone in armature.data.bones[hair_part].children_recursive:
+                    bone.select = True
+                armature.data.bones[hair_part].select = True
+
+            # Separate the hair bones to a new armature
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.armature.separate()
+            new_armature = bpy.data.objects['Armature.001']
+            new_armature.name = "HairArmature"
+            bpy.context.view_layer.objects.active = new_armature
+            bpy.ops.object.mode_set(mode='EDIT')
+
+            '''root=new_armature.data.edit_bones.new('root')
+            root.head = (0,0,0.013)
+            root.tail = (0,0,0.023)
+            for child in ['hair_back','hair_front','hair_side']:
+                new_armature.data.edit_bones[child].parent = root'''
+            #root_bone = new_armature.data.edit_bones.new('root')
+            #new_armature.data.edit_bones['hair_back'].parent = root_bone
+            #new_armature.data.edit_bones['hair_front'].parent = root_bone
+
+            # Move hair meshes to the new armature
+            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.select_all(action="DESELECT")
+            bpy.data.objects['Hair Outfit 00'].select_set(True)
+            bpy.context.view_layer.objects.active = new_armature
+            bpy.ops.object.parent_set(type='ARMATURE')
+            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.select_all(action='DESELECT')
+
+        if separate_head:
+            show_bones()
+
+            armature = bpy.data.objects['Armature']
+            bpy.context.view_layer.objects.active = armature
+            #armature.data.bones['cf_s_head'].select = True
+            for bone in armature.data.bones['deform_head'].children_recursive:
+                bone.select = True
+
+            # Separate the head bones to a new armature
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.armature.separate()
+            new_armature = bpy.data.objects['Armature.001']
+            new_armature.name = "HeadArmature"
+            bpy.context.view_layer.objects.active = new_armature
+            bpy.ops.object.mode_set(mode='EDIT')
+
+            '''root=new_armature.data.edit_bones.new('root')
+            root.head = (0,0,0.013)
+            root.tail = (0,0,0.023)
+            for child in ['joint_tang_01','N_EyesLookTargetP','p_cf_head_bone']:
+                new_armature.data.edit_bones[child].parent = root'''
+
+            bpy.context.view_layer.objects.active = bpy.data.objects['Body']
+            bpy.data.objects['Body'].select = True
+            bpy.ops.mesh.separate(type='MATERIAL')
+            bpy.data.objects['Body'].select = False
+            head = bpy.data.objects['Body.002']
+            bpy.context.view_layer.objects.active = head
+            bpy.ops.object.join()
+            head.name = "Head"
+
+            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.select_all(action="DESELECT")
+            bpy.context.view_layer.objects.active = new_armature
+            bpy.ops.object.mode_set(mode='EDIT')
+
+            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.select_all(action="DESELECT")
+            head.select = True
+            bpy.context.view_layer.objects.active = new_armature
+            bpy.ops.object.parent_set(type='ARMATURE')
+
+        bpy.ops.object.mode_set(mode='POSE')
 
     #If simplifying the bones...
     if simp_type in ['A', 'B']:
@@ -272,10 +568,14 @@ class export_prep(bpy.types.Operator):
         scene = context.scene.kkbp
         prep_type = scene.prep_dropdown
         simp_type = scene.simp_dropdown
+        separate_hair = scene.separate_hair_bool
+        separate_head = scene.separate_head_bool
+        remove_skirt = scene.remove_skirt_bool
+        remove_breast = scene.remove_breast_bool
         last_step = time.time()
         try:
             c.toggle_console()
-            if main(prep_type, simp_type):
+            if main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remove_breast):
                 scene.plugin_state = 'prepped'
             c.kklog('Finished in ' + str(time.time() - last_step)[0:4] + 's')
             c.toggle_console()

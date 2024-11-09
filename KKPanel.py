@@ -76,6 +76,7 @@ class PlaceholderProperties(PropertyGroup):
             #("C", "MikuMikuDance - PMX compatible", " "),
             ("D", t('prep_drop_D'), t('prep_drop_D_tt')),
             ("B", t('prep_drop_B'), t('prep_drop_B_tt')),
+            ("E", t('prep_drop_E'), t('prep_drop_E_tt')),
         ), name="", default=bpy.context.preferences.addons[__package__].preferences.prep_dropdown, description=t('prep_drop'))
 
     simp_dropdown : EnumProperty(
@@ -85,6 +86,22 @@ class PlaceholderProperties(PropertyGroup):
             ("C", t('simp_drop_C'), t('simp_drop_C_tt')),
         ), name="", default=bpy.context.preferences.addons[__package__].preferences.simp_dropdown, description=t('simp_drop'))
     
+    separate_hair_bool : BoolProperty(
+    description=t('separate_hair_tt'),
+    default = False)
+
+    separate_head_bool : BoolProperty(
+    description=t('separate_head_tt'),
+    default = False)
+
+    remove_skirt_bool : BoolProperty(
+    description=t('remove_skirt_tt'),
+    default = False)
+
+    remove_breast_bool : BoolProperty(
+    description=t('remove_breast'),
+    default = False)
+
     bake_light_bool : BoolProperty(
     description=t('bake_light_tt'),
     default = bpy.context.preferences.addons[__package__].preferences.bake_light_bool)
@@ -280,9 +297,17 @@ class EXPORTING_PT_panel(bpy.types.Panel):
         row.operator('kkbp.exportprep', text = t('prep'), icon = 'MODIFIER')
         row.enabled = scene.plugin_state in ['imported'] and bpy.context.scene.kkbp.armature_dropdown == 'A'
         row = col.row(align=True)
-        split = row.split(align=True, factor=splitfac)
+        split = row.split(align=True, factor=0.33)
         split.prop(context.scene.kkbp, "simp_dropdown")
         split.prop(context.scene.kkbp, "prep_dropdown")
+        split.prop(context.scene.kkbp, "separate_hair_bool", toggle=True, text = t('separate_hair'))
+
+        row = col.row(align=True)
+        split = row.split(align=True, factor=0.33)
+        split.prop(context.scene.kkbp, "separate_head_bool", toggle=True, text = t('separate_head'))
+        split.prop(context.scene.kkbp, "remove_skirt_bool", toggle=True, text = t('remove_skirt'))
+        split.prop(context.scene.kkbp, "remove_breast_bool", toggle=True, text = t('remove_breast'))
+
         row.enabled = scene.plugin_state in ['imported'] and bpy.context.scene.kkbp.armature_dropdown == 'A'
 
 class EXTRAS_PT_panel(bpy.types.Panel):
