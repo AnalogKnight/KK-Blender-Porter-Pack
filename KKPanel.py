@@ -173,7 +173,7 @@ class PlaceholderProperties(PropertyGroup):
 
     studio_lut_bool : BoolProperty(
         name="Enable or Disable",
-        description="""Enable this if you want the plugin to saturate the item's textures using the in-game LUT""",
+        description=t('convert_texture_tt'),
         default = True)
 
     rokoko_bool : BoolProperty(
@@ -184,7 +184,7 @@ class PlaceholderProperties(PropertyGroup):
     
     animation_import_type : BoolProperty(
         name="Enable or Disable",
-        description="""Disable this if you are importing a Koikatsu .fbx animation. Enable this if you are importing a Mixamo .fbx animation""",
+        description=t('animation_type_tt'),
         default = False)
 
     image_dropdown : EnumProperty(
@@ -339,12 +339,12 @@ class EXTRAS_PT_panel(bpy.types.Panel):
         split.prop(context.scene.kkbp, "dropdown_box")
         split.prop(context.scene.kkbp, "shadows_dropdown")
         split.prop(context.scene.kkbp, "blend_dropdown")
-        split.prop(context.scene.kkbp, "studio_lut_bool", toggle=True, text = "Convert texture?")
+        split.prop(context.scene.kkbp, "studio_lut_bool", toggle=True, text = t('convert_texture'))
 
         col = box.column(align=True)
         row = col.row(align=True)
         split = row.split(align=True, factor=splitfac)
-        split.label(text='Import single animation file')
+        split.label(text = t('single_animation'))
         split.operator('kkbp.importanimation', text = '', icon = 'ARMATURE_DATA')
         row.enabled = scene.plugin_state in ['imported'] and bpy.context.scene.kkbp.armature_dropdown == 'B'
         row = col.row(align=True)
@@ -382,7 +382,7 @@ class EXTRAS_PT_panel(bpy.types.Panel):
         col = box.column(align=True)
         row = col.row(align=True)
         split = row.split(align=True, factor=splitfac)
-        split.label(text="Update bone visibility")
+        split.label(text=t('bone_visibility'))
         split.operator('kkbp.updatebones', text = '', icon = 'BONE_DATA')
 
         col = box.column(align=True)
@@ -396,7 +396,7 @@ class EXTRAS_PT_panel(bpy.types.Panel):
         row = col.row(align=True)
         split = row.split(align=True, factor=splitfac)
         
-        split.label(text="Export Seperate Meshes")
+        split.label(text=t('export_sep_meshes'))
         split.operator('kkbp.exportseparatemeshes', text = '', icon = 'EXPORT')
         row.enabled = scene.plugin_state in ['imported'] and bpy.context.scene.kkbp.categorize_dropdown == 'D'
         
