@@ -93,87 +93,106 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         bpy.context.view_layer.objects.active = armature
 
         bpy.ops.object.mode_set(mode='EDIT')
-        armature.data.edit_bones['cf_j_waist02'].parent = armature.data.edit_bones['cf_j_hips']
-        armature.data.edit_bones['cf_j_waist01'].parent = armature.data.edit_bones['cf_j_waist02']
+
+        for bone in armature.pose.bones:
+            for constraint in bone.constraints:
+                bone.constraints.remove(constraint)
+
+        armature.data.edit_bones['cf_j_waist02'].parent = armature.data.edit_bones['Hips']
+        armature.data.edit_bones['Pelvis'].parent = armature.data.edit_bones['cf_j_waist02']
 
         bpy.ops.object.mode_set(mode='POSE')
         bpy.ops.pose.select_all(action='DESELECT')
 
-        armature.data.bones['cf_j_foot_L'].select = True
-        armature.data.bones['cf_j_foot_R'].select = True
+        armature.data.bones['Left ankle'].select = True
+        armature.data.bones['Right ankle'].select = True
         armature.data.bones['cf_j_waist02'].select = True
         armature.data.bones['cf_s_waist02'].select = True
-        #armature.data.bones['cf_j_waist01'].select = True
-        #armature.data.bones['cf_s_waist01'].select = True
+        armature.data.bones['Pelvis'].select = True
+        armature.data.bones['cf_s_waist01'].select = True
         #armature.data.bones['cf_j_spine01'].select = True
         #armature.data.bones['cf_s_spine01'].select = True
 
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.kkbp.cats_merge_weights()
 
-        armature.data.edit_bones['cf_s_leg_R'].parent = armature.data.edit_bones['cf_j_hips']
-        armature.data.edit_bones['cf_s_leg_L'].parent = armature.data.edit_bones['cf_j_hips']
+        armature.data.edit_bones['cf_s_leg_R'].parent = armature.data.edit_bones['Hips']
+        armature.data.edit_bones['cf_s_leg_L'].parent = armature.data.edit_bones['Hips']
 
         ue_rename_dict = {
-            'cf_j_hips': 'pelvis',
+            'Hips': 'pelvis',
             #'cf_j_waist02': 'spine_01',
-            'cf_j_waist01': 'spine_01',
-            'cf_j_spine01': 'spine_02',
-            'cf_j_spine02': 'spine_03',
-            'cf_j_spine03': 'spine_04',
-            'cf_j_neck': 'neck',
-            'cf_j_head': 'head',
-            'cf_j_shoulder_L': 'clavicle_l',
-            'cf_j_shoulder_R': 'clavicle_r',
-            'cf_j_arm00_L': 'upperarm_l',
-            'cf_j_arm00_R': 'upperarm_r',
-            'cf_j_forearm01_L': 'lowerarm_l',
-            'cf_j_forearm01_R': 'lowerarm_r',
-            'cf_j_hand_L': 'hand_l',
-            'cf_j_hand_R': 'hand_r',
+            'Spine': 'spine_01',
+            'Chest': 'spine_02',
+            'Upper Chest': 'spine_03',
+            'Neck': 'neck',
+            'Head': 'head',
+            'Left shoulder': 'clavicle_l',
+            'Right shoulder': 'clavicle_r',
+            'Left arm': 'upperarm_l',
+            'Right arm': 'upperarm_r',
+            'Left elbow': 'lowerarm_l',
+            'Right elbow': 'lowerarm_r',
+            'Left wrist': 'hand_l',
+            'Right wrist': 'hand_r',
             'cf_J_hitomi_tx_L': 'eye_l',
             'cf_J_hitomi_tx_R': 'eye_r',
+            'cf_s_shoulder02_l': 'deform_clavicle_l',
+            'cf_s_shoulder02_r': 'deform_clavicle_r',
 
-            'cf_j_thigh00_L': 'thigh_l',
-            'cf_j_thigh00_R': 'thigh_r',
-            'cf_j_leg01_L': 'calf_l',
-            'cf_j_leg01_R': 'calf_r',
+            'cf_s_bust00_L': 'joint_breast00_l',
+            'cf_s_bust00_R': 'joint_breast00_r',
+
+            'Left leg': 'thigh_l',
+            'Right leg': 'thigh_r',
+            'Left knee': 'calf_l',
+            'Right knee': 'calf_r',
             'cf_j_leg03_L': 'foot_l',
             'cf_j_leg03_R': 'foot_r',
-            'cf_j_toes_L': 'ball_l',
-            'cf_j_toes_R': 'ball_r',
+            'Left toe': 'ball_l',
+            'Right toe': 'ball_r',
 
-            'cf_j_index01_L': 'index_01_l',
-            'cf_j_index02_L': 'index_02_l',
-            'cf_j_index03_L': 'index_03_l',
-            'cf_j_little01_L': 'pinky_01_l',
-            'cf_j_little02_L': 'pinky_02_l',
-            'cf_j_little03_L': 'pinky_03_l',
-            'cf_j_middle01_L': 'middle_01_l',
-            'cf_j_middle02_L': 'middle_02_l',
-            'cf_j_middle03_L': 'middle_03_l',
-            'cf_j_ring01_L': 'ring_01_l',
-            'cf_j_ring02_L': 'ring_02_l',
-            'cf_j_ring03_L': 'ring_03_l',
-            'cf_j_thumb01_L': 'thumb_01_l',
-            'cf_j_thumb02_L': 'thumb_02_l',
-            'cf_j_thumb03_L': 'thumb_03_l',
+            'IndexFinger1_L': 'index_01_l',
+            'IndexFinger2_L': 'index_02_l',
+            'IndexFinger3_L': 'index_03_l',
+            'cf_j_index04_L': 'index_04_l',
+            'LittleFinger1_L': 'pinky_01_l',
+            'LittleFinger2_L': 'pinky_02_l',
+            'LittleFinger3_L': 'pinky_03_l',
+            'cf_j_little04_L': 'pinky_04_l',
+            'MiddleFinger1_L': 'middle_01_l',
+            'MiddleFinger2_L': 'middle_02_l',
+            'MiddleFinger3_L': 'middle_03_l',
+            'cf_j_middle04_L': 'middle_04_l',
+            'RingFinger1_L': 'ring_01_l',
+            'RingFinger2_L': 'ring_02_l',
+            'RingFinger3_L': 'ring_03_l',
+            'cf_j_ring04_L': 'ring_04_l',
+            'Thumb0_L': 'thumb_01_l',
+            'Thumb1_L': 'thumb_02_l',
+            'Thumb2_L': 'thumb_03_l',
+            'cf_j_thumb04_L': 'thumb_04_l',
 
-            'cf_j_index01_R': 'index_01_r',
-            'cf_j_index02_R': 'index_02_r',
-            'cf_j_index03_R': 'index_03_r',
-            'cf_j_little01_R': 'pinky_01_r',
-            'cf_j_little02_R': 'pinky_02_r',
-            'cf_j_little03_R': 'pinky_03_r',
-            'cf_j_middle01_R': 'middle_01_r',
-            'cf_j_middle02_R': 'middle_02_r',
-            'cf_j_middle03_R': 'middle_03_r',
-            'cf_j_ring01_R': 'ring_01_r',
-            'cf_j_ring02_R': 'ring_02_r',
-            'cf_j_ring03_R': 'ring_03_r',
-            'cf_j_thumb01_R': 'thumb_01_r',
-            'cf_j_thumb02_R': 'thumb_02_r',
-            'cf_j_thumb03_R': 'thumb_03_r'
+            'IndexFinger1_R': 'index_01_r',
+            'IndexFinger2_R': 'index_02_r',
+            'IndexFinger3_R': 'index_03_r',
+            'cf_j_index04_R': 'index_04_r',
+            'LittleFinger1_R': 'pinky_01_r',
+            'LittleFinger2_R': 'pinky_02_r',
+            'LittleFinger3_R': 'pinky_03_r',
+            'cf_j_little04_R': 'pinky_04_r',
+            'MiddleFinger1_R': 'middle_01_r',
+            'MiddleFinger2_R': 'middle_02_r',
+            'MiddleFinger3_R': 'middle_03_r',
+            'cf_j_middle04_R': 'middle_04_r',
+            'RingFinger1_R': 'ring_01_r',
+            'RingFinger2_R': 'ring_02_r',
+            'RingFinger3_R': 'ring_03_r',
+            'cf_j_ring04_R': 'ring_04_r',
+            'Thumb0_R': 'thumb_01_r',
+            'Thumb1_R': 'thumb_02_r',
+            'Thumb2_R': 'thumb_03_r',
+            'cf_j_thumb04_R': 'thumb_04_r'
         }
         for bone in ue_rename_dict:
             if armature.data.bones.get(bone):
@@ -187,7 +206,7 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         armature.data.edit_bones['thigh_l'].parent = armature.data.edit_bones['pelvis']
         armature.data.edit_bones['thigh_r'].parent = armature.data.edit_bones['pelvis']
         armature.data.edit_bones['pelvis'].parent = None
-        armature.data.edit_bones.remove(armature.data.edit_bones['BodyTop'])
+        #armature.data.edit_bones.remove(armature.data.edit_bones['Center'])
 
         '''private_parts = armature.data.edit_bones.new("private")
         private_parts.head = (0,0,0.8)
@@ -222,9 +241,10 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         armature.data.edit_bones['ik_hand_r'].parent = armature.data.edit_bones['ik_hand_gun']
 
         replace_dict = {
-            '_L': '_l',
-            '_R': '_r',
+            '_l': '_l',
+            '_r': '_r',
 
+            '_shoulder02': '_clavicle',
             '_shoulder': '_clavicle',
             '_arm': '_upperarm',
             '_forearm': '_lowerarm',
@@ -236,9 +256,10 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
             '_spine02': '_spine_03',
             '_spine03': '_spine_04',
 
-            '_sk_': '_skirt_',
+            '_bust': '_breast',
+            '_bnip': '_nipple',
 
-            'shoulder02': 'clavicle',
+            '_sk_': '_skirt_',
 
             'ct_hairB': 'hair_back',
             'ct_hairF': 'hair_front',
@@ -246,9 +267,9 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         }
 
         for keyword in replace_dict:
-            for bone in armature.data.bones:
-                if keyword in bone.name:
-                    bone.name = bone.name.replace(keyword, replace_dict[keyword])
+            for bone in armature.data.edit_bones:
+                if keyword in bone.name.lower():
+                    bone.name = bone.name.replace(keyword, replace_dict[keyword]).lower()
         
         for bone in armature.data.edit_bones:
             if 'cf_s' in bone.name.lower():
@@ -289,17 +310,57 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.kkbp.cats_merge_weights()
 
-        for parts_remove in ['cf_n_height', 'p_cf_body_bone', 'p_cf_body_00', 'HeadRef', 'joint_spinesk_00', 'ct_head']:
+        for parts_remove in ['Center', 'HeadRef', 'joint_spinesk_00', 'ct_head']:
             for bone in armature.data.edit_bones[parts_remove].children_recursive:
                 armature.data.edit_bones.remove(bone)
             armature.data.edit_bones.remove(
                 armature.data.edit_bones[parts_remove])
 
         for bone in armature.data.edit_bones:
-            for keyword_delete in ['cf_d', 'vagina', 'k_f_', 'cf_hit_', 'ct_', 'backsk', 'a_n', 'ollider', 'n_cam_', 'aim', 'siri', 'kokan', '_ana', 'cm_j_dan', '_pee', 'deform_hand']:
+            for keyword_delete in ['cf_d', 'vagina', 'k_f_', 'cf_hit_', 'ct_', 'backsk', 'a_n', 'ollider', 'n_cam_', 'aim', 'siri', 'kokan', '_ana', 'cm_j_dan', '_pee', 'deform_hand', 'Eye controller']:
                 if keyword_delete in bone.name.lower():
                     armature.data.edit_bones.remove(bone)
                     break
+
+        armature.data.edit_bones["calf_l"].tail.z = armature.data.edit_bones["calf_l"].head.z + 0.1
+        armature.data.edit_bones["calf_r"].tail.z = armature.data.edit_bones["calf_r"].head.z + 0.1
+
+        armature.data.edit_bones["ball_l"].tail.z = armature.data.edit_bones["ball_l"].head.z
+        armature.data.edit_bones["ball_l"].tail.y = armature.data.edit_bones["ball_l"].head.y + 0.05
+        armature.data.edit_bones["ball_r"].tail.z = armature.data.edit_bones["ball_r"].head.z
+        armature.data.edit_bones["ball_r"].tail.y = armature.data.edit_bones["ball_r"].head.y + 0.05
+
+        for arm_bone in ['clavicle', 'upperarm', 'lowerarm', 'hand','deform_clavicle', 'deform_upperarm01','deform_upperarm02','deform_upperarm03','deform_lowerarm01','deform_lowerarm02','deform_wrist','deform_elbo','deform_elboback']:
+            left = arm_bone + '_l'
+            right = arm_bone + '_r'
+            armature.data.edit_bones[left].tail.z = armature.data.edit_bones[left].head.z
+            armature.data.edit_bones[left].tail.x = armature.data.edit_bones[left].head.x + 0.05
+            armature.data.edit_bones[right].tail.z = armature.data.edit_bones[right].head.z
+            armature.data.edit_bones[right].tail.x = armature.data.edit_bones[right].head.x - 0.05
+
+        for finger_bone in ['index','pinky','middle','ring','thumb']:
+            for i in range(1,4):
+                left = finger_bone + '_0' + str(i) + '_l'
+                left_next = finger_bone + '_0' + str(i+1) + '_l'
+                right = finger_bone + '_0' + str(i) + '_r'
+                right_next = finger_bone + '_0' + str(i+1) + '_r'
+                armature.data.edit_bones[left].tail.z = armature.data.edit_bones[left_next].head.z
+                armature.data.edit_bones[left].tail.x = armature.data.edit_bones[left_next].head.x
+                armature.data.edit_bones[left].tail.y = armature.data.edit_bones[left_next].head.y
+
+                armature.data.edit_bones[right].tail.z = armature.data.edit_bones[right_next].head.z
+                armature.data.edit_bones[right].tail.x = armature.data.edit_bones[right_next].head.x
+                armature.data.edit_bones[right].tail.y = armature.data.edit_bones[right_next].head.y
+
+        if remove_breast == False:
+            armature.data.edit_bones['breasts'].tail.z = armature.data.edit_bones['breasts'].head.z
+            armature.data.edit_bones['breasts'].tail.y = armature.data.edit_bones['breasts'].head.y + 0.05
+            for side in ['_l','_r']:
+                breast_chain=['joint_breast00','joint_breast01','joint_breast02','joint_breast03','joint_nipple02root']
+                for i in range(0,len(breast_chain)-1):
+                    armature.data.edit_bones[breast_chain[i] + side].tail.x = armature.data.edit_bones[breast_chain[i + 1] + side].head.x
+                    armature.data.edit_bones[breast_chain[i] + side].tail.y = armature.data.edit_bones[breast_chain[i + 1] + side].head.y
+                    armature.data.edit_bones[breast_chain[i] + side].tail.z = armature.data.edit_bones[breast_chain[i + 1] + side].head.z
 
         # if separate the hair...
         if separate_hair:
