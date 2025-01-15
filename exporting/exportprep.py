@@ -1,6 +1,6 @@
 #simplfies bone count using the merge weights function in CATS
 
-import bpy, traceback, time
+import bpy, traceback, time, math
 from .. import common as c
 from ..interface.dictionary_en import t
 
@@ -91,6 +91,7 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
     if prep_type == 'E':
         armature = bpy.data.objects['Armature']
         bpy.context.view_layer.objects.active = armature
+        bpy.ops.armature.collection_show_all()
 
         bpy.ops.object.mode_set(mode='EDIT')
 
@@ -288,6 +289,12 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         root.tail = (0,0,0.023)
         for child in ['pelvis','ik_foot_root','ik_hand_root']:
             armature.data.edit_bones[child].parent = root'''
+        
+        for parts_remove in ['HeadRef', 'joint_spinesk_00', 'ct_head']:
+            for bone in armature.data.edit_bones[parts_remove].children_recursive:
+                armature.data.edit_bones.remove(bone)
+            armature.data.edit_bones.remove(
+                armature.data.edit_bones[parts_remove])
 
         bpy.ops.object.mode_set(mode='POSE')
         bpy.ops.pose.select_all(action='DESELECT')
@@ -303,32 +310,55 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
             armature.data.bones['breasts'].select = True
 
         for bone in armature.data.bones:
-            for keyword_merge in ['cf_d', 'vagina', 'k_f_', 'cf_hit_', 'backsk', 'siri', 'kokan', '_ana', 'cm_j_dan', '_pee', 'deform_hand']:
+            for keyword_merge in ['cf_d',
+                                  'vagina',
+                                  'k_f_',
+                                  'cf_hit_',
+                                  'backsk',
+                                  'siri',
+                                  'kokan',
+                                  '_ana',
+                                  'cm_j_dan',
+                                  '_pee',
+                                  'deform_hand',
+                                  'cf_d',
+                                  'vagina',
+                                  'k_f_',
+                                  'cf_hit_',
+                                  'ct_',
+                                  'backsk',
+                                  'a_n',
+                                  'ollider',
+                                  'n_cam_',
+                                  'aim',
+                                  'siri',
+                                  'kokan',
+                                  '_ana',
+                                  'cm_j_dan',
+                                  '_pee',
+                                  'deform_hand',
+                                  'Eye controller',
+                                  'Center']:
                 if keyword_merge in bone.name.lower():
                     bone.select = True
+                    break
 
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.kkbp.cats_merge_weights()
 
-        for parts_remove in ['Center', 'HeadRef', 'joint_spinesk_00', 'ct_head']:
-            for bone in armature.data.edit_bones[parts_remove].children_recursive:
-                armature.data.edit_bones.remove(bone)
-            armature.data.edit_bones.remove(
-                armature.data.edit_bones[parts_remove])
-
-        for bone in armature.data.edit_bones:
+        '''for bone in armature.data.edit_bones:
             for keyword_delete in ['cf_d', 'vagina', 'k_f_', 'cf_hit_', 'ct_', 'backsk', 'a_n', 'ollider', 'n_cam_', 'aim', 'siri', 'kokan', '_ana', 'cm_j_dan', '_pee', 'deform_hand', 'Eye controller']:
                 if keyword_delete in bone.name.lower():
                     armature.data.edit_bones.remove(bone)
-                    break
+                    break'''
 
         armature.data.edit_bones["calf_l"].tail.z = armature.data.edit_bones["calf_l"].head.z + 0.1
         armature.data.edit_bones["calf_r"].tail.z = armature.data.edit_bones["calf_r"].head.z + 0.1
 
         armature.data.edit_bones["ball_l"].tail.z = armature.data.edit_bones["ball_l"].head.z
-        armature.data.edit_bones["ball_l"].tail.y = armature.data.edit_bones["ball_l"].head.y + 0.05
+        armature.data.edit_bones["ball_l"].tail.y = armature.data.edit_bones["ball_l"].head.y - 0.05
         armature.data.edit_bones["ball_r"].tail.z = armature.data.edit_bones["ball_r"].head.z
-        armature.data.edit_bones["ball_r"].tail.y = armature.data.edit_bones["ball_r"].head.y + 0.05
+        armature.data.edit_bones["ball_r"].tail.y = armature.data.edit_bones["ball_r"].head.y - 0.05
 
         for arm_bone in ['clavicle', 'upperarm', 'lowerarm', 'hand','deform_clavicle', 'deform_upperarm01','deform_upperarm02','deform_upperarm03','deform_lowerarm01','deform_lowerarm02','deform_wrist','deform_elbo','deform_elboback']:
             left = arm_bone + '_l'
@@ -361,6 +391,14 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
                     armature.data.edit_bones[breast_chain[i] + side].tail.x = armature.data.edit_bones[breast_chain[i + 1] + side].head.x
                     armature.data.edit_bones[breast_chain[i] + side].tail.y = armature.data.edit_bones[breast_chain[i + 1] + side].head.y
                     armature.data.edit_bones[breast_chain[i] + side].tail.z = armature.data.edit_bones[breast_chain[i + 1] + side].head.z
+
+        root_bone = armature.data.edit_bones.new('root')
+        root_bone.head = (0,0,0)
+        root_bone.tail = (0.1,0,0)
+        root_bone.roll = math.pi/2
+        armature.data.edit_bones['pelvis'].parent = root_bone
+        armature.data.edit_bones['ik_foot_root'].parent = root_bone
+        armature.data.edit_bones['ik_hand_root'].parent = root_bone
 
         # if separate the hair...
         if separate_hair:
