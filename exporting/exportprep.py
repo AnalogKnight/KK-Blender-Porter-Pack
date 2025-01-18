@@ -122,9 +122,9 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         armature.data.edit_bones['cf_s_leg_L'].parent = armature.data.edit_bones['Hips']
 
         #Rename some bones to make it match Mannequin skeleton
+        #Not necessary, but allows Unreal automatically recognize and match bone names when retargeting
         ue_rename_dict = {
             'Hips': 'pelvis',
-            #'cf_j_waist02': 'spine_01',
             'Spine': 'spine_01',
             'Chest': 'spine_02',
             'Upper Chest': 'spine_03',
