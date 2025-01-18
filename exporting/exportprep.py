@@ -95,6 +95,7 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
 
         bpy.ops.object.mode_set(mode='EDIT')
 
+        #Clear IK, it won't work in unreal
         for bone in armature.pose.bones:
             for constraint in bone.constraints:
                 bone.constraints.remove(constraint)
@@ -120,6 +121,7 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         armature.data.edit_bones['cf_s_leg_R'].parent = armature.data.edit_bones['Hips']
         armature.data.edit_bones['cf_s_leg_L'].parent = armature.data.edit_bones['Hips']
 
+        #Rename some bones to make it match Mannequin skeleton
         ue_rename_dict = {
             'Hips': 'pelvis',
             #'cf_j_waist02': 'spine_01',
@@ -216,6 +218,7 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
         for private_part in ['cf_d_siri_L','cf_d_ana','cf_d_kokan','cf_d_siri_R','cf_d_sirihit_L','cf_d_sirihit_R']:
             armature.data.edit_bones[private_part].parent = private_parts'''
 
+        #Create unreal ik bones,
         ue_ik_bones = {
             'ik_foot_l': 'foot_l',
             'ik_foot_r': 'foot_r',
@@ -352,14 +355,18 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
                     armature.data.edit_bones.remove(bone)
                     break'''
 
+        #Make all the bones on the legs face the same direction, otherwise IK won't work in Unreal
         armature.data.edit_bones["calf_l"].tail.z = armature.data.edit_bones["calf_l"].head.z + 0.1
+        armature.data.edit_bones["calf_l"].head.y += 0.01
         armature.data.edit_bones["calf_r"].tail.z = armature.data.edit_bones["calf_r"].head.z + 0.1
+        armature.data.edit_bones["calf_r"].head.y += 0.01
 
         armature.data.edit_bones["ball_l"].tail.z = armature.data.edit_bones["ball_l"].head.z
         armature.data.edit_bones["ball_l"].tail.y = armature.data.edit_bones["ball_l"].head.y - 0.05
         armature.data.edit_bones["ball_r"].tail.z = armature.data.edit_bones["ball_r"].head.z
         armature.data.edit_bones["ball_r"].tail.y = armature.data.edit_bones["ball_r"].head.y - 0.05
 
+        #Same with arms
         for arm_bone in ['clavicle', 'upperarm', 'lowerarm', 'hand','deform_clavicle', 'deform_upperarm01','deform_upperarm02','deform_upperarm03','deform_lowerarm01','deform_lowerarm02','deform_wrist','deform_elbo','deform_elboback']:
             left = arm_bone + '_l'
             right = arm_bone + '_r'
