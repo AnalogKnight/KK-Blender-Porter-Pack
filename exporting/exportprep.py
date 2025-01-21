@@ -272,7 +272,7 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
 
         for keyword in replace_dict:
             for bone in armature.data.edit_bones:
-                if keyword in bone.name.lower():
+                if keyword.lower() in bone.name.lower():
                     bone.name = bone.name.replace(keyword, replace_dict[keyword]).lower()
         
         for bone in armature.data.edit_bones:
@@ -391,7 +391,7 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
 
         if remove_breast == False:
             armature.data.edit_bones['breasts'].tail.z = armature.data.edit_bones['breasts'].head.z
-            armature.data.edit_bones['breasts'].tail.y = armature.data.edit_bones['breasts'].head.y + 0.05
+            armature.data.edit_bones['breasts'].tail.y = armature.data.edit_bones['breasts'].head.y - 0.05
             for side in ['_l','_r']:
                 breast_chain=['joint_breast00','joint_breast01','joint_breast02','joint_breast03','joint_nipple02root']
                 for i in range(0,len(breast_chain)-1):
@@ -409,7 +409,9 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
 
         # if separate the hair...
         if separate_hair:
-            show_bones()
+            bpy.ops.object.mode_set(mode='POSE')
+            bpy.ops.armature.collection_show_all()
+            bpy.ops.pose.select_all(action='DESELECT')
 
             armature = bpy.data.objects['Armature']
             # Select bones on layer 10
@@ -445,7 +447,9 @@ def main(prep_type, simp_type, separate_hair, separate_head, remove_skirt, remov
             bpy.ops.object.select_all(action='DESELECT')
 
         if separate_head:
-            show_bones()
+            bpy.ops.object.mode_set(mode='POSE')
+            bpy.ops.armature.collection_show_all()
+            bpy.ops.pose.select_all(action='DESELECT')
 
             armature = bpy.data.objects['Armature']
             bpy.context.view_layer.objects.active = armature
