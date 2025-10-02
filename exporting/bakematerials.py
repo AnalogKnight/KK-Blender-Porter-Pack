@@ -420,6 +420,10 @@ def create_material_atlas(folderpath: str):
     #setup materials for the combiner script
     for obj in [o for o in bpy.data.collections[c.get_name() + ' atlas'].all_objects if o.type == 'MESH']:
         for mat in [mat_slot.material for mat_slot in obj.material_slots if mat_slot.material.get('simple')]:
+            #Skip eye materials if skip_eyes enabled
+            if context.scene.kkbp.skip_eyes and 'hitomi' in mat.name.lower():
+                mat['simple'] = False
+                continue
             nodes = mat.node_tree.nodes
             links = mat.node_tree.links
             emissive_node = nodes.new('ShaderNodeEmission')

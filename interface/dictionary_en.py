@@ -130,6 +130,9 @@ translation_dictionary = {
     'use_atlas_tt': 'Enable this to create a material atlas when finalizing materials',
     'dont_use_atlas' : 'Don\'t create Atlas',
 
+    'skip_eyes' : 'Skip eyes',
+    'skip_eyes_tt' : 'Skip eye materials when creating atlas to allow UV offsets to be applied in third-party applications.',
+
     'mat_comb_tt' : 'KKBP uses parts of Shotariya\'s Material Combiner addon to automatically merge your materials into an atlas. Click this if you want to manually combine your materials instead of letting KKBP do it for you (requires you to download the Material Combiner addon. Also, make sure you have already clicked the Finalize Materials button in the KKBP panel or it will not work) ',
     'matcomb' : 'Setup materials for Material Combiner',
     'mat_comb_switch' : 'Toggle light / dark for Material Combiner',

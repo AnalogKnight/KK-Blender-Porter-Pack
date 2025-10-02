@@ -104,6 +104,10 @@ class PlaceholderProperties(PropertyGroup):
     description=t('use_atlas_tt'),
     default = bpy.context.preferences.addons[__package__].preferences.use_atlas)
 
+    skip_eyes : BoolProperty(
+    description=t('skip_eyes_tt'),
+    default=False)
+
     animation_library_scale : BoolProperty(
     description=t('animation_library_scale_tt'),
     default = True)
@@ -269,6 +273,9 @@ class IMPORTING_PT_panel(bpy.types.Panel):
         else:
             split.prop(context.scene.kkbp, "use_atlas", toggle=True, text = t('use_atlas') if scene.use_atlas else t('dont_use_atlas'))
             split.operator('kkbp.resetmaterials', text = t('reset_mats'), icon='RECOVER_LAST')
+            if scene.use_atlas:
+                row = col.row(align=True)
+                row.prop(context.scene.kkbp, "skip_eyes", toggle=True, text=t('skip_eyes'))
 
         row.enabled = scene.plugin_state in ['imported', 'prepped']
 

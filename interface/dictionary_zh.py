@@ -130,6 +130,9 @@ translation_dictionary = {
     'use_atlas_tt'   : '禁用此功能可在最终确定材质时节省大量时间，但不会创建材质图集。',
     'dont_use_atlas' : '不创建材质图集',
 
+    'skip_eyes' : '跳过眼睛',
+    'skip_eyes_tt' : '在创建图集时跳过眼睛材质，以便在第三方应用程序中对眼睛应用UV偏移。',
+
     'mat_comb_tt'        : '该插件使用Shotariya\'s Material Combiner插件来把材质转化为图集。如果你想手动实现该过程的话，启用该选项。(这样的话，你需要自行下载相关插件。当然，你需要先确定最终材质（烘培），否则不会生效),',
     'matcomb'            : '自动/手动结合材质',
     'mat_comb_switch'    : '切换 Material Combiner 的明/暗模式',

@@ -138,6 +138,8 @@ def get_structure(scn: Scene, data: SMCObData, mats_uv: MatsUV) -> Structure:
         for mat in item:
             if mat.name not in ob.data.materials:
                 continue
+            if bpy.context.scene.kkbp.skip_eyes and 'hitomi' in mat.name.lower():
+                continue
             kkbp_root_mat = mat.kkbp_root_mat or mat
             if mat.kkbp_root_mat and mat.name not in structure[kkbp_root_mat]['dup']:
                 structure[kkbp_root_mat]['dup'].append(mat.name)
